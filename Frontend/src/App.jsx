@@ -12,9 +12,12 @@ import NotFound from "./pages/NotFound";
 
 import ProtectedRoute from "./components/ProtectedRoute";
 import Profile from "./pages/Profile";
+import Navbar from "./components/Navbar";
 
 function App() {
   return (
+    <>
+      <Navbar />
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
@@ -28,6 +31,7 @@ function App() {
         </Route>
         <Route path="*" element={<NotFound />} />
       </Routes>
+    </>
   );
 }
 
