@@ -11,6 +11,7 @@ import Blog from "./pages/Blog";
 import NotFound from "./pages/NotFound";
 
 import ProtectedRoute from "./components/ProtectedRoute";
+import Profile from "./pages/Profile";
 
 function App() {
   return (
@@ -23,6 +24,7 @@ function App() {
           <Route path="/blog/:id" element={<Blog />} />
           <Route path="/latest" element={<LatestBlogs />} />
           <Route path="/edit/:id" element={<EditBlog />} />
+          <Route path="/profile/:username" element={<Profile />} />
         </Route>
         <Route path="*" element={<NotFound />} />
       </Routes>
