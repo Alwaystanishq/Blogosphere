@@ -9,10 +9,10 @@ import Signup from "./pages/Signup";
 import EditBlog from "./pages/EditBlog";
 import Blog from "./pages/Blog";
 import NotFound from "./pages/NotFound";
-
 import ProtectedRoute from "./components/ProtectedRoute";
 import Profile from "./pages/Profile";
 import Navbar from "./components/Navbar";
+import Search from "./pages/Search";
 
 function App() {
   return (
@@ -28,6 +28,7 @@ function App() {
           <Route path="/latest" element={<LatestBlogs />} />
           <Route path="/edit/:id" element={<EditBlog />} />
           <Route path="/profile/:username" element={<Profile />} />
+          <Route path="/search" element={<Search />} />
         </Route>
         <Route path="*" element={<NotFound />} />
       </Routes>

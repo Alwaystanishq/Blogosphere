@@ -1,29 +1,46 @@
-import React from "react";
 import { BiSolidLike } from "react-icons/bi";
+import { useNavigate } from "react-router-dom";
 
-function BlogCard() {
+function BlogCard({ blog }) {
+  const navigate = useNavigate();
+
+  const handleClick = () => {
+    navigate(`/blog/${blog._id}`);
+  };
+
   return (
-    <div className="border border-zinc-200 rounded-2xl p-4 flex justify-between items-start hover:shadow-md transition-all duration-300">
+    <div
+      onClick={handleClick}
+      className="border border-zinc-200 rounded-2xl p-4 flex justify-between items-start hover:shadow-md transition-all duration-300 cursor-pointer"
+    >
       <div className="max-w-xl">
-        <h1 className="text-xl md:text-2xl font-semibold mb-1">Blog Title</h1>
+        {/* Title */}
+        <h1 className="text-xl md:text-2xl font-semibold mb-1">{blog.title}</h1>
 
-        <p className="text-gray-600 text-sm">
-          Lorem ipsum dolor sit amet, consectetur adipisicing elit...
-        </p>
+        {/* Article Preview */}
+        <p className="text-gray-600 text-sm line-clamp-2">{blog.article}</p>
 
+        {/* Author */}
         <div className="flex items-center gap-2 mt-3">
           <img
-            src="/avatar.png"
+            src={`http://localhost:5000${blog.writtenBy?.profilePic || "/uploads/default.png"}`}
             alt="profile"
-            className="w-6 h-6 rounded-full"
+            className="w-6 h-6 rounded-full object-cover"
           />
-          <span className="text-sm text-gray-500">@username</span>
+
+          <span className="text-sm text-gray-500">
+            @{blog.writtenBy?.username}
+          </span>
         </div>
       </div>
 
-      <div className="flex items-center gap-1 bg-zinc-100 hover:bg-zinc-200 rounded-full px-3 py-1 text-sm cursor-pointer">
+      {/* Likes */}
+      <div
+        className="flex items-center gap-1 bg-zinc-100 hover:bg-zinc-200 rounded-full px-3 py-1 text-sm"
+        onClick={(e) => e.stopPropagation()} // prevent navigation when clicking likes
+      >
         <BiSolidLike />
-        <p>100</p>
+        <p>{blog.likedBy?.length || 0}</p>
       </div>
     </div>
   );
