@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext.jsx";
+import { useAuth } from "../context/useAuth";
 import { useState } from "react";
 import { HiMenu, HiX } from "react-icons/hi";
 
@@ -8,10 +8,20 @@ function Navbar() {
   const navigate = useNavigate();
 
   const [open, setOpen] = useState(false);
+  const [search, setSearch] = useState("");
 
   const handleLogout = async () => {
     await logout();
     navigate("/login");
+  };
+
+  const handleSearch = (e) => {
+    e.preventDefault();
+
+    if (!search.trim()) return;
+
+    navigate(`/latest?q=${search}`);
+    setSearch("");
     setOpen(false);
   };
 
@@ -19,7 +29,7 @@ function Navbar() {
     <nav className="sticky top-0 z-50 bg-white shadow-md">
       <div className="px-6 py-4 flex justify-between items-center">
         {/* Logo */}
-        <Link to="/" className="text-2xl font-bold text-gray-800">
+        <Link to="/" className="text-2xl font-bold">
           Blogosphere
         </Link>
 
@@ -27,19 +37,24 @@ function Navbar() {
         <div className="hidden md:flex items-center gap-6">
           {user ? (
             <>
-              <Link to="/latest" className="hover:text-black">
-                Latest
-              </Link>
+              {/* Search */}
+              <form onSubmit={handleSearch}>
+                <input
+                  type="text"
+                  placeholder="Search blogs..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className="border px-3 py-1 rounded-lg focus:ring-2 focus:ring-black outline-none"
+                />
+              </form>
 
-              <Link to="/myblog" className="hover:text-black">
-                My Blogs
-              </Link>
-
+              <Link to="/latest">Latest</Link>
+              <Link to="/myblog">My Blogs</Link>
               <Link to={`/profile/${user.username}`}>Profile</Link>
 
               <button
                 onClick={handleLogout}
-                className="bg-black text-white px-4 py-1 rounded-lg hover:bg-gray-800"
+                className="bg-black text-white px-4 py-1 rounded-lg"
               >
                 Logout
               </button>
@@ -47,10 +62,9 @@ function Navbar() {
           ) : (
             <>
               <Link to="/login">Login</Link>
-
               <Link
                 to="/signup"
-                className="bg-black text-white px-4 py-1 rounded-lg hover:bg-gray-800"
+                className="bg-black text-white px-4 py-1 rounded-lg"
               >
                 Signup
               </Link>
@@ -58,7 +72,7 @@ function Navbar() {
           )}
         </div>
 
-        {/* Mobile Hamburger */}
+        {/* Mobile Toggle */}
         <button onClick={() => setOpen(!open)} className="md:hidden text-2xl">
           {open ? <HiX /> : <HiMenu />}
         </button>
@@ -69,6 +83,17 @@ function Navbar() {
         <div className="md:hidden flex flex-col gap-4 px-6 pb-4 border-t">
           {user ? (
             <>
+              {/* Mobile Search */}
+              <form onSubmit={handleSearch}>
+                <input
+                  type="text"
+                  placeholder="Search blogs..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className="border px-3 py-2 rounded-lg w-full"
+                />
+              </form>
+
               <Link onClick={() => setOpen(false)} to="/latest">
                 Latest
               </Link>
@@ -96,7 +121,7 @@ function Navbar() {
               <Link onClick={() => setOpen(false)} to="/login">
                 Login
               </Link>
-<Navbar/>
+
               <Link
                 onClick={() => setOpen(false)}
                 to="/signup"
