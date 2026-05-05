@@ -20,7 +20,7 @@ function Navbar() {
 
     if (!search.trim()) return;
 
-    navigate(`/latest?q=${search}`);
+    navigate(`/search?q=${search}`);
     setSearch("");
     setOpen(false);
   };

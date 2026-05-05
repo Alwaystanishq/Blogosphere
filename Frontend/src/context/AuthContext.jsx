@@ -10,7 +10,7 @@ export const AuthProvider = ({ children }) => {
   // Check login when app loads
   const checkLogin = async () => {
     try {
-      const res = await api.get("/auth/check");
+      const res = await api.get("/user/check");
 
       if (res.data.success) {
         setUser(res.data.user);
@@ -25,7 +25,7 @@ export const AuthProvider = ({ children }) => {
 
   const logout = async () => {
     try {
-      await api.post("/auth/logout");
+      await api.post("/user/logout");
       setUser(null);
     } catch (error) {
       console.log(error);
