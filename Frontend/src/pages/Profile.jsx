@@ -19,7 +19,7 @@ function Profile() {
 
         if (res.data.success) {
           setUser(res.data.user);
-          setBlogs(res.data.blogs);
+          setBlogs(res.data.blogs || []); // ✅ FIXED
         }
       } catch (err) {
         setError(err.response?.data?.message || "Failed to load profile");

@@ -13,6 +13,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import Profile from "./pages/Profile";
 import Navbar from "./components/Navbar";
 import Search from "./pages/Search";
+import CreateBlog from "./pages/CreateBlog";
 
 function App() {
   return (
@@ -24,6 +25,7 @@ function App() {
         <Route path="/signup" element={<Signup />} />
         <Route element={<ProtectedRoute />}>
           <Route path="/myblog" element={<MyBlogs />} />
+          <Route path="/create" element={<CreateBlog />} />
           <Route path="/blog/:id" element={<Blog />} />
           <Route path="/latest" element={<LatestBlogs />} />
           <Route path="/edit/:id" element={<EditBlog />} />

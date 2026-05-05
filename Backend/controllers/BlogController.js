@@ -49,18 +49,30 @@ export const deleteBlog = async (req, res) => {
 
 export const oneBlog = async (req, res) => {
   try {
-    const userId = req.user._id;
     const blogId = req.params.id;
-    const blog = await Blog.findOne({ _id: blogId, writtenBy: userId });
+
+    const blog = await Blog.findById(blogId).populate(
+      "writtenBy",
+      "username profilePic",
+    );
+
     if (!blog) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Blog not found" });
+      return res.status(404).json({
+        success: false,
+        message: "Blog not found",
+      });
     }
-    res.status(200).json({ success: true, blog });
+
+    res.status(200).json({
+      success: true,
+      blog,
+    });
   } catch (error) {
     console.error(`Error in oneBlog route ${error}`);
-    res.status(500).json({ success: false, message: "Internal Server error" });
+    res.status(500).json({
+      success: false,
+      message: "Internal Server error",
+    });
   }
 };
 
@@ -229,12 +241,14 @@ export const profile = async (req, res) => {
     }
     const blogs = await Blog.find({
       writtenBy: user._id,
-    }).populate("writtenBy", "username").sort({ createdAt:-1 });
-    return res.status(200).json({
-      success:true,
-      user,
-      blogs
     })
+      .populate("writtenBy", "username")
+      .sort({ createdAt: -1 });
+    return res.status(200).json({
+      success: true,
+      user,
+      blogs,
+    });
   } catch (error) {
     console.error(`Error in profile route: ${error.message}`);
     return res.status(500).json({

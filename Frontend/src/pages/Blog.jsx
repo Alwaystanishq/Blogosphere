@@ -79,7 +79,7 @@ function Blog() {
 
         <div className="flex items-center gap-3">
           <img
-            src={`http://localhost:5000${blog.writtenBy?.profilePic}`}
+            src={`http://localhost:5000${blog.writtenBy?.profilePic || "/uploads/default.png"}`}
             alt="profile"
             className="w-10 h-10 rounded-full object-cover"
           />

@@ -30,7 +30,7 @@ function MyBlogs() {
 
   const handleDelete = async (id) => {
     const confirmDelete = window.confirm(
-      "Are you sure you want to delete this blog?",
+      "Are you sure you want to delete this blog?"
     );
 
     if (!confirmDelete) return;
@@ -40,7 +40,7 @@ function MyBlogs() {
 
       setBlogs(blogs.filter((blog) => blog._id !== id));
     } catch (error) {
-      alert("Failed to delete blog", error);
+      alert("Failed to delete blog");
     }
   };
 
@@ -71,27 +71,13 @@ function MyBlogs() {
       ) : (
         <div className="space-y-6">
           {blogs.map((blog) => (
-            <div key={blog._id} className="relative">
-              {/* Blog Card */}
-              <BlogCard blog={blog} />
-
-              {/* Edit + Delete Buttons */}
-              <div className="absolute top-4 right-4 flex gap-3">
-                <button
-                  onClick={() => navigate(`/edit/${blog._id}`)}
-                  className="text-sm text-blue-600 hover:underline"
-                >
-                  Edit
-                </button>
-
-                <button
-                  onClick={() => handleDelete(blog._id)}
-                  className="text-sm text-red-600 hover:underline"
-                >
-                  Delete
-                </button>
-              </div>
-            </div>
+            <BlogCard
+              key={blog._id}
+              blog={blog}
+              showActions={true}
+              onEdit={() => navigate(`/edit/${blog._id}`)}
+              onDelete={() => handleDelete(blog._id)}
+            />
           ))}
         </div>
       )}
