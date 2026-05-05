@@ -31,7 +31,7 @@ function Login() {
 
     try {
 
-      const res = await api.post("/auth/login", form);
+      const res = await api.post("/user/login", form);
 
       if (res.data.success) {
         setUser(res.data.user);

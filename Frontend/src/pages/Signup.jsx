@@ -52,7 +52,7 @@ function Signup() {
         formData.append("profilePic", form.profilePic);
       }
 
-      const res = await api.post("/auth/signup", formData);
+      const res = await api.post("/user/signup", formData);
 
       if (res.data.success) {
         setUser(res.data.user);
