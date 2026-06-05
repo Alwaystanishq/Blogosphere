@@ -17,67 +17,75 @@ function Home() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col justify-center items-center text-center px-4 bg-gradient-to-b from-indigo-50 to-white">
-      {/* Hero */}
-      <h1 className="text-5xl md:text-7xl font-bold mb-6">
-        Welcome to{" "}
-        <span className="text-indigo-600">
-          Blogosphere
-        </span>
-      </h1>
+    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-emerald-50">
+      <div className="max-w-7xl mx-auto px-6 py-20">
+        <div className="grid lg:grid-cols-2 gap-16 items-center">
+          
+          {/* Left Side */}
+          <div>
+            <span className="bg-indigo-100 text-indigo-600 px-4 py-2 rounded-full text-sm font-semibold">
+              ✍️ Write • Read • Connect
+            </span>
 
-      <p className="text-zinc-600 max-w-2xl mb-10 text-lg md:text-xl leading-8">
-        Share your thoughts, discover inspiring stories, and connect with
-        passionate writers from around the world.
-      </p>
+            <h1 className="text-5xl md:text-7xl font-bold mt-6 leading-tight">
+              Share Your
+              <span className="block text-indigo-600">
+                Stories With The World
+              </span>
+            </h1>
 
-      {/* CTA Buttons */}
-      <div className="flex flex-col sm:flex-row gap-4">
-        <Link
-          to="/signup"
-          className="bg-emerald-500 hover:bg-emerald-600 text-white px-8 py-3 rounded-xl font-semibold transition shadow-md"
-        >
-          Get Started
-        </Link>
+            <p className="text-zinc-600 text-lg mt-6 leading-8 max-w-xl">
+              Blogosphere is a place where writers and readers connect.
+              Publish articles, discover ideas, and build your personal brand.
+            </p>
 
-        <Link
-          to="/login"
-          className="border-2 border-indigo-500 text-indigo-600 hover:bg-indigo-600 hover:text-white px-8 py-3 rounded-xl font-semibold transition"
-        >
-          Login
-        </Link>
-      </div>
+            <div className="flex flex-wrap gap-4 mt-10">
+              <Link
+                to="/signup"
+                className="bg-emerald-500 hover:bg-emerald-600 text-white px-8 py-4 rounded-xl font-semibold transition shadow-lg"
+              >
+                Start Writing
+              </Link>
 
-      {/* Features */}
-      <div className="grid md:grid-cols-3 gap-6 mt-20 max-w-5xl w-full">
-        <div className="bg-white p-6 rounded-2xl shadow-md border border-zinc-200">
-          <h3 className="text-xl font-semibold text-indigo-600 mb-3">
-            Write
-          </h3>
+              <Link
+                to="/login"
+                className="border-2 border-indigo-500 text-indigo-600 hover:bg-indigo-600 hover:text-white px-8 py-4 rounded-xl font-semibold transition"
+              >
+                Login
+              </Link>
+            </div>
+          </div>
 
-          <p className="text-zinc-600">
-            Create beautiful blogs and share your ideas with the world.
-          </p>
-        </div>
+          {/* Right Side */}
+          <div className="grid gap-5">
+            <div className="bg-white p-6 rounded-3xl shadow-lg border border-zinc-100">
+              <h3 className="text-xl font-bold text-indigo-600 mb-2">
+                📝 Publish Blogs
+              </h3>
+              <p className="text-zinc-600">
+                Write articles and share your thoughts with thousands of readers.
+              </p>
+            </div>
 
-        <div className="bg-white p-6 rounded-2xl shadow-md border border-zinc-200">
-          <h3 className="text-xl font-semibold text-rose-500 mb-3">
-            Engage
-          </h3>
+            <div className="bg-white p-6 rounded-3xl shadow-lg border border-zinc-100">
+              <h3 className="text-xl font-bold text-rose-500 mb-2">
+                ❤️ Engage With Content
+              </h3>
+              <p className="text-zinc-600">
+                Discover blogs, like your favorites, and explore new ideas.
+              </p>
+            </div>
 
-          <p className="text-zinc-600">
-            Like and discover articles written by other creators.
-          </p>
-        </div>
+            <div className="bg-white p-6 rounded-3xl shadow-lg border border-zinc-100">
+              <h3 className="text-xl font-bold text-emerald-600 mb-2">
+                👤 Build Your Profile
+              </h3>
+              <p className="text-zinc-600">
+                Create a unique identity and showcase your published work.
+              </p>
+            </div>
+          </div>
 
-        <div className="bg-white p-6 rounded-2xl shadow-md border border-zinc-200">
-          <h3 className="text-xl font-semibold text-emerald-600 mb-3">
-            Grow
-          </h3>
-
-          <p className="text-zinc-600">
-            Build your profile and become part of the Blogosphere community.
-          </p>
         </div>
       </div>
     </div>
