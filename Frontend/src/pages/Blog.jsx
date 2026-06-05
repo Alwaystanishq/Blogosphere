@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import api from "../api/api";
 import { useAuth } from "../context/AuthContext";
 import { BiSolidLike } from "react-icons/bi";
@@ -28,7 +28,7 @@ function Blog() {
 
           if (user) {
             const alreadyLiked = blogData.likedBy?.some(
-              (id) => id.toString() === user.id.toString(),
+              (likeId) => likeId.toString() === user.id.toString(),
             );
 
             setLiked(alreadyLiked);
@@ -81,19 +81,25 @@ function Blog() {
 
         {/* Author + Like */}
         <div className="flex justify-between items-center mb-10 pb-6 border-b border-zinc-200">
+          {/* Author */}
           <div className="flex items-center gap-3">
-            <img
-              src={`http://localhost:5000${
-                blog.writtenBy?.profilePic || "/uploads/default.png"
-              }`}
-              alt="profile"
-              className="w-12 h-12 rounded-full object-cover border border-zinc-300"
-            />
+            <Link to={`/profile/${blog.writtenBy?.username}`}>
+              <img
+                src={`http://localhost:5000${
+                  blog.writtenBy?.profilePic || "/uploads/default.png"
+                }`}
+                alt="profile"
+                className="w-12 h-12 rounded-full object-cover border border-zinc-300 hover:scale-105 transition"
+              />
+            </Link>
 
             <div>
-              <p className="font-semibold text-zinc-800">
+              <Link
+                to={`/profile/${blog.writtenBy?.username}`}
+                className="font-semibold text-indigo-600 hover:underline"
+              >
                 @{blog.writtenBy?.username}
-              </p>
+              </Link>
 
               <p className="text-sm text-gray-500">
                 {new Date(blog.createdAt).toLocaleDateString()}
@@ -101,6 +107,7 @@ function Blog() {
             </div>
           </div>
 
+          {/* Like Button */}
           <button
             onClick={handleLike}
             className={`flex items-center gap-2 px-5 py-2 rounded-full transition font-medium
