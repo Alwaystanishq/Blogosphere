@@ -9,14 +9,12 @@ function Blog() {
   const { user } = useAuth();
 
   const [blog, setBlog] = useState(null);
-
   const [liked, setLiked] = useState(false);
   const [likesCount, setLikesCount] = useState(0);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  // Fetch Blog
   useEffect(() => {
     const fetchBlog = async () => {
       try {
@@ -26,13 +24,12 @@ function Blog() {
           const blogData = res.data.blog;
 
           setBlog(blogData);
-
-          // Likes Count
           setLikesCount(blogData.likedBy?.length || 0);
 
-          // Check if current user liked
           if (user) {
-            const alreadyLiked = blogData.likedBy?.includes(user.id);
+            const alreadyLiked = blogData.likedBy?.some(
+              (id) => id.toString() === user.id.toString(),
+            );
 
             setLiked(alreadyLiked);
           }
@@ -47,69 +44,81 @@ function Blog() {
     fetchBlog();
   }, [id, user]);
 
-  // Toggle Like
   const handleLike = async () => {
     try {
       await api.post(`/blogs/like/${id}`);
 
       setLiked(!liked);
-
       setLikesCount((prev) => (liked ? prev - 1 : prev + 1));
     } catch (error) {
       console.log("Like failed", error);
     }
   };
 
-  if (loading) return <div className="text-center pt-24">Loading blog...</div>;
+  if (loading) {
+    return (
+      <div className="text-center pt-24 text-indigo-600 font-medium">
+        Loading blog...
+      </div>
+    );
+  }
 
-  if (error)
+  if (error) {
     return <div className="text-center text-red-500 pt-24">{error}</div>;
+  }
 
-  if (!blog) return <div className="text-center pt-24">Blog not found</div>;
+  if (!blog) {
+    return <div className="text-center pt-24">Blog not found</div>;
+  }
 
   return (
     <div className="max-w-4xl mx-auto px-4 pt-20 pb-10">
-      {/* Title */}
-      <h1 className="text-3xl md:text-4xl font-bold mb-4">{blog.title}</h1>
+      <div className="bg-white rounded-3xl shadow-lg border border-zinc-200 p-8">
+        {/* Title */}
+        <h1 className="text-4xl md:text-5xl font-bold text-indigo-600 mb-6 leading-tight">
+          {blog.title}
+        </h1>
 
-      {/* Author + Like Row */}
+        {/* Author + Like */}
+        <div className="flex justify-between items-center mb-10 pb-6 border-b border-zinc-200">
+          <div className="flex items-center gap-3">
+            <img
+              src={`http://localhost:5000${
+                blog.writtenBy?.profilePic || "/uploads/default.png"
+              }`}
+              alt="profile"
+              className="w-12 h-12 rounded-full object-cover border border-zinc-300"
+            />
 
-      <div className="flex justify-between items-center mb-10">
-        {/* Author */}
+            <div>
+              <p className="font-semibold text-zinc-800">
+                @{blog.writtenBy?.username}
+              </p>
 
-        <div className="flex items-center gap-3">
-          <img
-            src={`http://localhost:5000${blog.writtenBy?.profilePic || "/uploads/default.png"}`}
-            alt="profile"
-            className="w-10 h-10 rounded-full object-cover"
-          />
-
-          <div>
-            <p className="font-medium">@{blog.writtenBy?.username}</p>
-
-            <p className="text-sm text-gray-500">
-              {new Date(blog.createdAt).toLocaleDateString()}
-            </p>
+              <p className="text-sm text-gray-500">
+                {new Date(blog.createdAt).toLocaleDateString()}
+              </p>
+            </div>
           </div>
+
+          <button
+            onClick={handleLike}
+            className={`flex items-center gap-2 px-5 py-2 rounded-full transition font-medium
+            ${
+              liked
+                ? "bg-rose-500 text-white hover:bg-rose-600"
+                : "bg-rose-100 text-rose-600 hover:bg-rose-200"
+            }`}
+          >
+            <BiSolidLike size={18} />
+            <span>{likesCount}</span>
+          </button>
         </div>
 
-        {/* Like Button */}
-
-        <button
-          onClick={handleLike}
-          className={`flex items-center gap-2 px-4 py-2 rounded-full transition
-          ${liked ? "bg-black text-white" : "bg-zinc-100 hover:bg-zinc-200"}`}
-        >
-          <BiSolidLike />
-
-          <span>{likesCount}</span>
-        </button>
-      </div>
-
-      {/* Article */}
-
-      <div className="leading-8 text-gray-800 whitespace-pre-line">
-        {blog.article}
+        {/* Article */}
+        <article className="leading-9 text-lg text-zinc-700 whitespace-pre-line">
+          {blog.article}
+        </article>
       </div>
     </div>
   );

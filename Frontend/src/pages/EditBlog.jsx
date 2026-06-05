@@ -15,7 +15,6 @@ function EditBlog() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
-  // Fetch existing blog
   useEffect(() => {
     const fetchBlog = async () => {
       try {
@@ -69,7 +68,11 @@ function EditBlog() {
   };
 
   if (loading) {
-    return <div className="text-center pt-24">Loading blog...</div>;
+    return (
+      <div className="text-center pt-24 text-indigo-600 font-medium">
+        Loading blog...
+      </div>
+    );
   }
 
   if (error && !form.title) {
@@ -77,46 +80,64 @@ function EditBlog() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-4 pt-20">
-      <h1 className="text-3xl font-bold mb-6">Edit Blog</h1>
+    <div className="max-w-4xl mx-auto px-4 pt-20 pb-10">
+      <div className="bg-white border border-zinc-200 rounded-3xl shadow-lg p-8">
+        {/* Heading */}
+        <h1 className="text-4xl font-bold text-indigo-600 mb-2">Edit Blog</h1>
 
-      {error && <p className="text-red-500 mb-4">{error}</p>}
+        <p className="text-zinc-500 mb-8">
+          Update your article and keep it fresh.
+        </p>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Title */}
-        <div>
-          <label className="block mb-2 font-medium">Title</label>
+        {error && (
+          <div className="bg-red-100 text-red-600 px-4 py-3 rounded-xl mb-6">
+            {error}
+          </div>
+        )}
 
-          <input
-            type="text"
-            name="title"
-            value={form.title}
-            onChange={handleChange}
-            className="w-full border px-4 py-2 rounded-lg focus:ring-2 focus:ring-black outline-none"
-          />
-        </div>
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Title */}
+          <div>
+            <label className="block mb-2 font-semibold text-zinc-700">
+              Blog Title
+            </label>
 
-        {/* Article */}
-        <div>
-          <label className="block mb-2 font-medium">Article</label>
+            <input
+              type="text"
+              name="title"
+              value={form.title}
+              onChange={handleChange}
+              className="w-full border border-zinc-300 px-4 py-3 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition"
+            />
+          </div>
 
-          <textarea
-            name="article"
-            rows="10"
-            value={form.article}
-            onChange={handleChange}
-            className="w-full border px-4 py-2 rounded-lg focus:ring-2 focus:ring-black outline-none resize-none"
-          />
-        </div>
+          {/* Article */}
+          <div>
+            <label className="block mb-2 font-semibold text-zinc-700">
+              Article
+            </label>
 
-        <button
-          type="submit"
-          disabled={saving}
-          className="bg-black text-white px-6 py-2 rounded-lg hover:bg-gray-800 transition"
-        >
-          {saving ? "Updating..." : "Update Blog"}
-        </button>
-      </form>
+            <textarea
+              name="article"
+              rows="12"
+              value={form.article}
+              onChange={handleChange}
+              className="w-full border border-zinc-300 px-4 py-3 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none resize-none transition"
+            />
+          </div>
+
+          {/* Submit */}
+          <div className="flex justify-end">
+            <button
+              type="submit"
+              disabled={saving}
+              className="bg-emerald-500 hover:bg-emerald-600 text-white px-8 py-3 rounded-xl font-semibold transition disabled:opacity-70"
+            >
+              {saving ? "Updating..." : "Update Blog"}
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 }

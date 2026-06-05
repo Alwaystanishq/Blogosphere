@@ -4,7 +4,6 @@ import api from "../api/api";
 import { useAuth } from "../context/AuthContext";
 
 function Login() {
-
   const { setUser } = useAuth();
   const navigate = useNavigate();
 
@@ -30,56 +29,50 @@ function Login() {
     setLoading(true);
 
     try {
-
       const res = await api.post("/user/login", form);
 
       if (res.data.success) {
         setUser(res.data.user);
         navigate("/myblog");
       }
-
     } catch (err) {
-
-      setError(
-        err.response?.data?.message || "Login failed"
-      );
-
+      setError(err.response?.data?.message || "Login failed");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-
-    <div className="flex justify-center pt-20 px-4">
-
-      <div className="bg-white p-8 rounded-2xl shadow-md w-full max-w-md">
-
-        <h2 className="text-2xl font-bold text-center mb-6">
-          Login to Blogosphere
+    <div className="min-h-screen flex justify-center items-center px-4 bg-gradient-to-b from-indigo-50 to-white">
+      <div className="bg-white border border-zinc-200 rounded-3xl shadow-lg p-8 w-full max-w-md">
+        {/* Heading */}
+        <h2 className="text-3xl font-bold text-center text-indigo-600 mb-2">
+          Welcome Back
         </h2>
 
+        <p className="text-center text-zinc-500 mb-8">
+          Login to continue exploring Blogosphere.
+        </p>
+
         {error && (
-          <p className="text-red-500 text-sm mb-4">
+          <div className="bg-red-100 text-red-600 px-4 py-3 rounded-xl mb-6">
             {error}
-          </p>
+          </div>
         )}
 
-        <form
-          onSubmit={handleSubmit}
-          className="space-y-4"
-        >
-
+        <form onSubmit={handleSubmit} className="space-y-5">
+          {/* Email */}
           <input
             type="email"
             name="email"
-            placeholder="Email"
+            placeholder="Email Address"
             required
             value={form.email}
             onChange={handleChange}
-            className="w-full border px-3 py-2 rounded-lg focus:ring-2 focus:ring-black outline-none"
+            className="w-full border border-zinc-300 px-4 py-3 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition"
           />
 
+          {/* Password */}
           <input
             type="password"
             name="password"
@@ -87,28 +80,30 @@ function Login() {
             required
             value={form.password}
             onChange={handleChange}
-            className="w-full border px-3 py-2 rounded-lg focus:ring-2 focus:ring-black outline-none"
+            className="w-full border border-zinc-300 px-4 py-3 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition"
           />
 
+          {/* Login Button */}
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-black text-white py-2 rounded-lg hover:bg-gray-800"
+            className="w-full bg-emerald-500 hover:bg-emerald-600 text-white py-3 rounded-xl font-semibold transition disabled:opacity-70"
           >
             {loading ? "Logging in..." : "Login"}
           </button>
-
         </form>
 
-        <p className="text-sm text-center mt-4">
+        {/* Footer */}
+        <p className="text-sm text-center mt-6 text-zinc-600">
           Don't have an account?{" "}
-          <Link to="/signup" className="underline font-medium">
+          <Link
+            to="/signup"
+            className="text-indigo-600 font-semibold hover:text-indigo-700"
+          >
             Signup
           </Link>
         </p>
-
       </div>
-
     </div>
   );
 }

@@ -30,7 +30,7 @@ function MyBlogs() {
 
   const handleDelete = async (id) => {
     const confirmDelete = window.confirm(
-      "Are you sure you want to delete this blog?"
+      "Are you sure you want to delete this blog?",
     );
 
     if (!confirmDelete) return;
@@ -45,7 +45,11 @@ function MyBlogs() {
   };
 
   if (loading) {
-    return <div className="text-center pt-24">Loading your blogs...</div>;
+    return (
+      <div className="text-center pt-24 text-indigo-600 font-medium">
+        Loading your blogs...
+      </div>
+    );
   }
 
   if (error) {
@@ -53,21 +57,37 @@ function MyBlogs() {
   }
 
   return (
-    <div className="max-w-5xl mx-auto px-4 pt-20 pb-10">
+    <div className="max-w-6xl mx-auto px-4 pt-20 pb-10">
       {/* Header */}
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold">My Blogs</h1>
+      <div className="flex flex-col md:flex-row justify-between md:items-center gap-4 mb-10">
+        <div>
+          <h1 className="text-4xl font-bold text-indigo-600 mb-2">My Blogs</h1>
+
+          <p className="text-zinc-500">
+            Manage and edit your published articles.
+          </p>
+        </div>
 
         <button
           onClick={() => navigate("/create")}
-          className="bg-black text-white px-4 py-2 rounded-lg hover:bg-gray-800"
+          className="bg-emerald-500 hover:bg-emerald-600 text-white px-5 py-3 rounded-xl font-semibold transition shadow-md"
         >
-          Create Blog
+          + Create Blog
         </button>
       </div>
 
+      {/* Blogs */}
       {blogs.length === 0 ? (
-        <p className="text-gray-500">You haven’t written any blogs yet.</p>
+        <div className="bg-white border border-zinc-200 rounded-2xl p-8 text-center shadow-sm">
+          <p className="text-zinc-500">You haven't written any blogs yet.</p>
+
+          <button
+            onClick={() => navigate("/create")}
+            className="mt-4 bg-emerald-500 hover:bg-emerald-600 text-white px-5 py-2 rounded-xl transition"
+          >
+            Write Your First Blog
+          </button>
+        </div>
       ) : (
         <div className="space-y-6">
           {blogs.map((blog) => (

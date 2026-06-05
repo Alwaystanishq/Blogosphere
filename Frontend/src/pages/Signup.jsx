@@ -66,15 +66,24 @@ function Signup() {
   };
 
   return (
-    <div className="flex justify-center pt-20 px-4">
-      <div className="bg-white p-8 rounded-2xl shadow-md w-full max-w-md">
-        <h2 className="text-2xl font-bold text-center mb-6">
-          Signup to Blogosphere
+    <div className="min-h-screen flex justify-center items-center px-4 bg-gradient-to-b from-indigo-50 to-white">
+      <div className="bg-white border border-zinc-200 rounded-3xl shadow-lg p-8 w-full max-w-md">
+        {/* Heading */}
+        <h2 className="text-3xl font-bold text-center text-indigo-600 mb-2">
+          Join Blogosphere
         </h2>
 
-        {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
+        <p className="text-center text-zinc-500 mb-8">
+          Create your account and start sharing your stories.
+        </p>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        {error && (
+          <div className="bg-red-100 text-red-600 px-4 py-3 rounded-xl mb-6">
+            {error}
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit} className="space-y-5">
           <input
             type="text"
             name="name"
@@ -82,7 +91,7 @@ function Signup() {
             required
             value={form.name}
             onChange={handleChange}
-            className="w-full border px-3 py-2 rounded-lg focus:ring-2 focus:ring-black outline-none"
+            className="w-full border border-zinc-300 px-4 py-3 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition"
           />
 
           <input
@@ -92,17 +101,17 @@ function Signup() {
             required
             value={form.username}
             onChange={handleChange}
-            className="w-full border px-3 py-2 rounded-lg focus:ring-2 focus:ring-black outline-none"
+            className="w-full border border-zinc-300 px-4 py-3 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition"
           />
 
           <input
             type="email"
             name="email"
-            placeholder="Email"
+            placeholder="Email Address"
             required
             value={form.email}
             onChange={handleChange}
-            className="w-full border px-3 py-2 rounded-lg focus:ring-2 focus:ring-black outline-none"
+            className="w-full border border-zinc-300 px-4 py-3 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition"
           />
 
           <input
@@ -112,29 +121,38 @@ function Signup() {
             required
             value={form.password}
             onChange={handleChange}
-            className="w-full border px-3 py-2 rounded-lg focus:ring-2 focus:ring-black outline-none"
+            className="w-full border border-zinc-300 px-4 py-3 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition"
           />
 
-          <input
-            type="file"
-            name="profilePic"
-            accept="image/*"
-            onChange={handleChange}
-            className="w-full text-sm"
-          />
+          <div>
+            <label className="block text-sm font-medium text-zinc-600 mb-2">
+              Profile Picture (Optional)
+            </label>
+
+            <input
+              type="file"
+              name="profilePic"
+              accept="image/*"
+              onChange={handleChange}
+              className="w-full border border-zinc-300 rounded-xl p-2 text-sm"
+            />
+          </div>
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-black text-white py-2 rounded-lg hover:bg-gray-800"
+            className="w-full bg-emerald-500 hover:bg-emerald-600 text-white py-3 rounded-xl font-semibold transition disabled:opacity-70"
           >
-            {loading ? "Creating Account..." : "Signup"}
+            {loading ? "Creating Account..." : "Create Account"}
           </button>
         </form>
 
-        <p className="text-sm text-center mt-4">
+        <p className="text-sm text-center mt-6 text-zinc-600">
           Already have an account?{" "}
-          <Link to="/login" className="underline font-medium">
+          <Link
+            to="/login"
+            className="text-indigo-600 font-semibold hover:text-indigo-700"
+          >
             Login
           </Link>
         </p>

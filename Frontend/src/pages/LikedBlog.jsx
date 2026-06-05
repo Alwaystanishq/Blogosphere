@@ -25,18 +25,36 @@ function LikedBlogs() {
     fetchLikedBlogs();
   }, []);
 
-  if (loading)
-    return <div className="text-center pt-24">Loading liked blogs...</div>;
+  if (loading) {
+    return (
+      <div className="text-center pt-24 text-rose-500 font-medium">
+        Loading liked blogs...
+      </div>
+    );
+  }
 
-  if (error)
+  if (error) {
     return <div className="text-center text-red-500 pt-24">{error}</div>;
+  }
 
   return (
-    <div className="max-w-5xl mx-auto px-4 pt-20 pb-10">
-      <h1 className="text-3xl font-bold mb-8">Liked Blogs ❤️</h1>
+    <div className="max-w-6xl mx-auto px-4 pt-20 pb-10">
+      {/* Header */}
+      <div className="mb-10">
+        <h1 className="text-4xl font-bold text-rose-500 mb-2">
+          ❤️ Liked Blogs
+        </h1>
 
+        <p className="text-zinc-500">
+          Blogs you've enjoyed and saved with a like.
+        </p>
+      </div>
+
+      {/* Blogs */}
       {blogs.length === 0 ? (
-        <p className="text-gray-500">You haven't liked any blogs yet.</p>
+        <div className="bg-white border border-zinc-200 rounded-2xl p-8 text-center shadow-sm">
+          <p className="text-zinc-500">You haven't liked any blogs yet.</p>
+        </div>
       ) : (
         <div className="space-y-6">
           {blogs.map((blog) => (
