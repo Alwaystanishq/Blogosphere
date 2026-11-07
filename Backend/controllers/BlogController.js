@@ -1,3 +1,4 @@
+import { cachedFeed, invalidateFeeds } from "../utils/feedCache.js";
 import { parseTopics } from "../utils/blogTopics.js";
 import Comment from "../models/CommentModel.js";
 import Blog from "../models/BlogModel.js";
@@ -27,20 +28,19 @@ export const getlatestBlog = async (req, res) => {
       tags: tag === undefined ? undefined : [tag],
     });
     if (error) return res.status(400).json({ success: false, message: error });
-    const published = { status: { $ne: "draft" } };
-    const filter = { ...published };
-    if (topics.category) filter.category = topics.category;
-    if (topics.tags?.length) filter.tags = topics.tags[0];
-    const [blogs, categories, tags] = await Promise.all([
-      Blog.find(filter).populate("writtenBy", "username profilePic").sort({ createdAt: -1 }).limit(10),
-      Blog.distinct("category", published),
-      Blog.distinct("tags", published),
-    ]);
-    res.status(200).json({
-      success: true,
-      blogs,
-      topics: { categories: categories.filter(Boolean).sort(), tags: tags.filter(Boolean).sort() },
+    const payload = await cachedFeed("latest", [topics.category || "", topics.tags?.[0] || ""], async () => {
+      const published = { status: { $ne: "draft" } };
+      const filter = { ...published };
+      if (topics.category) filter.category = topics.category;
+      if (topics.tags?.length) filter.tags = topics.tags[0];
+      const [blogs, categories, tags] = await Promise.all([
+        Blog.find(filter).populate("writtenBy", "username profilePic").sort({ createdAt: -1 }).limit(10),
+        Blog.distinct("category", published),
+        Blog.distinct("tags", published),
+      ]);
+      return { success: true, blogs, topics: { categories: categories.filter(Boolean).sort(), tags: tags.filter(Boolean).sort() } };
     });
+    res.status(200).json(payload);
   } catch (error) {
     console.error(`Error in getlatestBlog route ${error}`);
     res.status(500).json({ success: false, message: "Internal Server error" });
@@ -60,6 +60,7 @@ export const deleteBlog = async (req, res) => {
         .status(404)
         .json({ success: false, message: "Blog not found" });
     }
+    await invalidateFeeds();
     await Comment.deleteMany({ blog: blogId });
     res.status(200).json({ success: true, message: "Blog Deleted" });
   } catch (error) {
@@ -114,6 +115,7 @@ export const createBlog = async (req, res) => {
       return res.status(400).json({ success: false, message: "Title and article are required to publish" });
     }
     const blog = await Blog.create({ title, article, status, articleFormat, coverImage, ...topics, writtenBy: userId });
+    await invalidateFeeds();
     res.status(201).json({ success: true, message: "Blog created", blog });
   } catch (error) {
     console.error(`Error in createBlog route ${error}`);
@@ -152,6 +154,7 @@ export const updateBlog = async (req, res) => {
       return res.status(400).json({ success: false, message: "Title and article are required to publish" });
     }
     await blog.save();
+    await invalidateFeeds();
     res.status(200).json({
       success: true,
       message: "Blog updated successfully",
@@ -230,6 +233,7 @@ export const toggleLikeBlog = async (req, res) => {
       blog.likedBy.push(userId);
     }
     await blog.save();
+    await invalidateFeeds();
     return res.status(200).json({
       success: true,
       message: alreadyLiked ? "Blog unliked" : "Blog liked",
@@ -245,24 +249,16 @@ export const toggleLikeBlog = async (req, res) => {
 
 export const getTopLikedBlog = async (req, res) => {
   try {
-    const blogs = await Blog.aggregate([
-      { $match: { status: { $ne: "draft" } } },
-      {
-        $addFields: {
-          likesCount: { $size: "$likedBy" },
-        },
-      },
-      {
-        $sort: { likesCount: -1 },
-      },
-      {
-        $limit: 10,
-      },
-    ]);
-    return res.status(200).json({
-      success: true,
-      blogs,
+    const payload = await cachedFeed("topLiked", [], async () => {
+      const blogs = await Blog.aggregate([
+        { $match: { status: { $ne: "draft" } } },
+        { $addFields: { likesCount: { $size: { $ifNull: ["$likedBy", []] } } } },
+        { $sort: { likesCount: -1, createdAt: -1, _id: -1 } },
+        { $limit: 10 },
+      ]);
+      return { success: true, blogs };
     });
+    return res.status(200).json(payload);
   } catch (error) {
     console.error(`Error in getTopLikedBlogs: ${error.message}`);
     return res.status(500).json({

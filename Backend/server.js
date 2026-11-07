@@ -6,6 +6,7 @@ import cookieParser from "cookie-parser";
 import { authToken } from "./middlewares/authMiddleware.js";
 import userRoutes from "./routes/userRoute.js";
 import blogRoutes from "./routes/blogRoute.js";
+import { connectRedis, disconnectRedis } from "./config/redis.js";
 import { connectDB } from "./config/db.js";
 
 const app = express();
@@ -21,6 +22,7 @@ app.use(express.json());
 app.use("/uploads", express.static(fileURLToPath(new URL("./uploads/", import.meta.url))));
 const port = process.env.PORT || 5000;
 connectDB();
+connectRedis();
 
 app.use("/api/user", userRoutes);
 app.use("/api/blogs", authToken, blogRoutes);
@@ -28,3 +30,6 @@ app.use("/api/blogs", authToken, blogRoutes);
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });
+
+process.once("SIGINT", () => { disconnectRedis(); process.exit(0); });
+process.once("SIGTERM", () => { disconnectRedis(); process.exit(0); });

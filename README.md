@@ -19,7 +19,7 @@ Draft posts are excluded from search, discovery, public profiles, likes, and dis
 
 **Frontend:** React, Vite, React Router, Axios, Tailwind CSS, React Icons, react-markdown, and remark-breaks.
 
-**Backend:** Express, Mongoose, JWT, bcrypt, cookie-parser, Multer, and dotenv.
+**Backend:** Express, Mongoose, JWT, bcrypt, cookie-parser, Multer, dotenv, and Redis (optional feed cache).
 
 ## Project structure
 
@@ -60,6 +60,9 @@ Use a current Node.js release compatible with Vite 7 (Node 20.19+ or 22.12+) and
    MONGO_URI=mongodb://127.0.0.1:27017/blogosphere
    JWT_SECRET=replace_with_a_long_random_secret
    NODE_ENV=development
+   # Optional; omit to use MongoDB without caching
+   REDIS_URL=redis://127.0.0.1:6379
+   REDIS_KEY_PREFIX=blogosphere:feeds:v1
    ```
 
 3. Start the API from the `Backend` directory:
@@ -83,6 +86,26 @@ Use a current Node.js release compatible with Vite 7 (Node 20.19+ or 22.12+) and
 The frontend API base URL is configured in `Frontend/src/api/api.js`. Backend CORS allows `http://localhost:5173`. Update both when using different origins. Profile pictures currently also use the localhost API origin in their UI components.
 
 Uploaded files are stored on the backend filesystem. Keep `Backend/uploads` on persistent storage when deploying. JWT cookies use the `secure` flag when `NODE_ENV=production`.
+
+## Redis feed caching
+
+Set `REDIS_URL` in `Backend/.env` to enable Redis for `GET /api/blogs/latest`
+and `GET /api/blogs/topLiked`. Without it, both routes query MongoDB directly.
+Use `rediss://` for a TLS Redis endpoint. Use a different `REDIS_KEY_PREFIX` for
+applications or environments sharing a Redis database.
+
+Run a local Redis instance before starting the backend, for example:
+
+```sh
+redis-server
+```
+
+- Successful feed responses are cached for 5 minutes (300 seconds). Normalized category/tag combinations have separate latest-feed entries.
+- Creating, updating, deleting, publishing, or liking/unliking a post invalidates both feeds, including topic options and every filtered latest-feed entry.
+- A shared generation key makes invalidation work across backend processes. In-flight reads cannot repopulate the active generation with old results. Obsolete entries expire automatically.
+- Authentication and filter validation run before cache reads. Draft posts are excluded from both feeds.
+- Redis connects in the background and reconnects automatically. Offline commands are not queued; cache commands have a 250 ms deadline. Redis failures fall back to MongoDB without failing requests. If invalidation cannot reach Redis during an outage, old entries may remain until their 5-minute expiry.
+- Invalid requests and database errors are never cached. Restart the backend after changing Redis settings.
 
 ## Commands
 
