@@ -4,7 +4,7 @@ import User from "../models/userModel.js";
 export const getBlog = async (req, res) => {
   try {
     const userId = req.user._id;
-    const blogs = await Blog.find({ writtenBy: userId });
+    const blogs = await Blog.find({ writtenBy: userId }).populate("writtenBy", "username profilePic").sort({ updatedAt: -1 });
     if (blogs.length === 0) {
       return res
         .status(200)
@@ -19,7 +19,7 @@ export const getBlog = async (req, res) => {
 
 export const getlatestBlog = async (req, res) => {
   try {
-    const blogs = await Blog.find().sort({ createdAt: -1 }).limit(10);
+    const blogs = await Blog.find({ status: { $ne: "draft" } }).sort({ createdAt: -1 }).limit(10);
     res.status(200).json({ success: true, blogs });
   } catch (error) {
     console.error(`Error in getlatestBlog route ${error}`);
@@ -56,7 +56,7 @@ export const oneBlog = async (req, res) => {
       "username profilePic",
     );
 
-    if (!blog) {
+    if (!blog || (blog.status === "draft" && String(blog.writtenBy?._id || blog.writtenBy) !== String(req.user._id))) {
       return res.status(404).json({
         success: false,
         message: "Blog not found",
@@ -79,17 +79,14 @@ export const oneBlog = async (req, res) => {
 export const createBlog = async (req, res) => {
   try {
     const userId = req.user._id;
-    const { title, article } = req.body;
-    if (!title || !article) {
-      return res
-        .status(400)
-        .json({ success: false, message: "all field are required" });
+    const { title = "", article = "", status = "published" } = req.body;
+    if (!["draft", "published"].includes(status) || typeof title !== "string" || typeof article !== "string") {
+      return res.status(400).json({ success: false, message: "Invalid blog fields" });
     }
-    const blog = await Blog.create({
-      title,
-      article,
-      writtenBy: userId,
-    });
+    if (status === "published" && (!title.trim() || !article.trim())) {
+      return res.status(400).json({ success: false, message: "Title and article are required to publish" });
+    }
+    const blog = await Blog.create({ title, article, status, writtenBy: userId });
     res.status(201).json({ success: true, message: "Blog created", blog });
   } catch (error) {
     console.error(`Error in createBlog route ${error}`);
@@ -101,23 +98,22 @@ export const updateBlog = async (req, res) => {
   try {
     const userId = req.user._id;
     const blogId = req.params.id;
-    const { title, article } = req.body;
-    if (!title && !article) {
-      return res
-        .status(400)
-        .json({ success: false, message: "At least one field is required" });
+    const { title, article, status } = req.body;
+    if ((title !== undefined && typeof title !== "string") ||
+        (article !== undefined && typeof article !== "string") ||
+        (status !== undefined && !["draft", "published"].includes(status))) {
+      return res.status(400).json({ success: false, message: "Invalid blog fields" });
     }
-    const blog = await Blog.findOne({
-      _id: blogId,
-      writtenBy: userId,
-    });
+    const blog = await Blog.findOne({ _id: blogId, writtenBy: userId });
     if (!blog) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Blog not found" });
+      return res.status(404).json({ success: false, message: "Blog not found" });
     }
-    if (title) blog.title = title;
-    if (article) blog.article = article;
+    if (title !== undefined) blog.title = title;
+    if (article !== undefined) blog.article = article;
+    if (status !== undefined) blog.status = status;
+    if (blog.status !== "draft" && (!blog.title.trim() || !blog.article.trim())) {
+      return res.status(400).json({ success: false, message: "Title and article are required to publish" });
+    }
     await blog.save();
     res.status(200).json({
       success: true,
@@ -141,6 +137,7 @@ export const searchBlog = async (req, res) => {
     }
     const results = await Blog.find({
       title: { $regex: q, $options: "i" },
+      status: { $ne: "draft" },
     });
     res.status(200).json({ success: true, results });
   } catch (error) {
@@ -152,7 +149,7 @@ export const searchBlog = async (req, res) => {
 export const getLikedBlog = async (req, res) => {
   try {
     const userId = req.user._id;
-    const blogs = await Blog.find({ likedBy: userId })
+    const blogs = await Blog.find({ likedBy: userId, status: { $ne: "draft" } })
       .populate("writtenBy", "username")
       .sort({ createdAt: -1 });
     return res.status(200).json({
@@ -172,7 +169,7 @@ export const toggleLikeBlog = async (req, res) => {
   try {
     const userId = req.user._id;
     const blogId = req.params.id;
-    const blog = await Blog.findById(blogId);
+    const blog = await Blog.findOne({ _id: blogId, status: { $ne: "draft" } });
     if (!blog) {
       return res.status(404).json({
         success: false,
@@ -202,6 +199,7 @@ export const toggleLikeBlog = async (req, res) => {
 export const getTopLikedBlog = async (req, res) => {
   try {
     const blogs = await Blog.aggregate([
+      { $match: { status: { $ne: "draft" } } },
       {
         $addFields: {
           likesCount: { $size: "$likedBy" },
@@ -241,6 +239,7 @@ export const profile = async (req, res) => {
     }
     const blogs = await Blog.find({
       writtenBy: user._id,
+      status: { $ne: "draft" },
     })
       .populate("writtenBy", "username")
       .sort({ createdAt: -1 });

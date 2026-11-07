@@ -4,11 +4,18 @@ const blogSchema = new mongoose.Schema(
   {
     title: {
       type: String,
-      required: true,
+      default: "",
+      required: function () { return this.status !== "draft"; },
     },
     article: {
       type: String,
-      required: true,
+      default: "",
+      required: function () { return this.status !== "draft"; },
+    },
+    status: {
+      type: String,
+      enum: ["draft", "published"],
+      default: "published",
     },
     writtenBy: {
       type: mongoose.Schema.Types.ObjectId,

@@ -39,7 +39,7 @@ function MyBlogs() {
       await api.delete(`/blogs/${id}`);
 
       setBlogs(blogs.filter((blog) => blog._id !== id));
-    } catch (error) {
+    } catch {
       alert("Failed to delete blog");
     }
   };
@@ -64,7 +64,7 @@ function MyBlogs() {
           <h1 className="text-4xl font-bold text-indigo-600 mb-2">My Blogs</h1>
 
           <p className="text-zinc-500">
-            Manage and edit your published articles.
+            Manage your private drafts and published articles.
           </p>
         </div>
 

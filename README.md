@@ -6,6 +6,7 @@ Users can:
 
 - 🔐 Signup & Login (JWT Authentication)
 - 📝 Create, Edit, Delete Blogs
+- 💾 Private drafts and automatic browser recovery
 - ❤️ Like / Unlike Blogs
 - 🔍 Search Blogs
 - 👤 View User Profiles
@@ -72,6 +73,9 @@ blogosphere/
 
 ### 📝 Blog System
 - Create blog
+- Save incomplete posts as private drafts and publish them later from My Blogs
+- Automatically recover unfinished writing in the same browser, separately for each account
+- Use Save Draft to persist writing to your account across devices
 - Edit blog
 - Delete blog
 - View single blog
@@ -209,3 +213,9 @@ GET    /api/blogs/profile/:username
 Developed by Tanishq Chauhan
 
 ---
+
+## Draft regression checks
+
+Run `node Backend/tests/drafts.test.js` to verify draft creation, publishing validation,
+owner-only access, and exclusion from discovery and likes. These checks mock the
+persistence layer; they do not require a running MongoDB instance.

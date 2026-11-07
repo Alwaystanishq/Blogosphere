@@ -5,7 +5,7 @@ function BlogCard({ blog, showActions = false, onEdit, onDelete }) {
   const navigate = useNavigate();
 
   const handleClick = () => {
-    navigate(`/blog/${blog._id}`);
+    navigate(blog.status === "draft" ? `/edit/${blog._id}` : `/blog/${blog._id}`);
   };
 
   return (
@@ -18,7 +18,8 @@ function BlogCard({ blog, showActions = false, onEdit, onDelete }) {
         <div className="flex-1">
           {/* Title */}
           <h1 className="text-xl md:text-2xl font-bold text-indigo-600 mb-2">
-            {blog.title}
+            {blog.title || "Untitled draft"}
+            {blog.status === "draft" && <span className="ml-3 text-sm font-medium text-amber-700">Draft · Private</span>}
           </h1>
 
           {/* Article Preview */}
