@@ -8,6 +8,7 @@ Users can:
 - 📝 Create, Edit, Delete Blogs
 - 💾 Private drafts and automatic browser recovery
 - ❤️ Like / Unlike Blogs
+- 🏷️ Add categories and tags, and filter published blogs by topic
 - 🔍 Search Blogs
 - 👤 View User Profiles
 - 📚 View Liked Blogs
@@ -73,6 +74,8 @@ blogosphere/
 
 ### 📝 Blog System
 - Create blog
+- Add an optional category and up to 5 comma-separated tags; topics are normalized to lowercase
+- Click topic badges or use Latest Blogs filters to discover matching published posts
 - Write Markdown with formatting buttons for headings, emphasis, links, lists, quotes, and code
 - Switch between Write and Preview before publishing; existing plain-text posts retain their format
 - Save incomplete posts as private drafts and publish them later from My Blogs
@@ -215,12 +218,3 @@ GET    /api/blogs/profile/:username
 Developed by Tanishq Chauhan
 
 ---
-
-## Draft regression checks
-
-Run `node Backend/tests/drafts.test.js` to verify draft creation, publishing validation,
-owner-only access, and exclusion from discovery and likes. These checks mock the
-persistence layer; they do not require a running MongoDB instance.
-
-Run `npm run test:markdown --prefix Frontend` for Markdown rendering, safe links,
-plain-text compatibility, and formatting selection checks.

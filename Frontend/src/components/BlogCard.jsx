@@ -1,3 +1,4 @@
+import BlogTopics from "./BlogTopics";
 import { BiSolidLike } from "react-icons/bi";
 import { Link, useNavigate } from "react-router-dom";
 
@@ -24,6 +25,8 @@ function BlogCard({ blog, showActions = false, onEdit, onDelete }) {
 
           {/* Article Preview */}
           <p className="text-zinc-600 line-clamp-2">{blog.article}</p>
+
+          <BlogTopics category={blog.category} tags={blog.tags} />
 
           {/* Author */}
           <div className="flex items-center gap-2 mt-4">

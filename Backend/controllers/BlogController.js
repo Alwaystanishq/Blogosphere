@@ -1,3 +1,4 @@
+import { parseTopics } from "../utils/blogTopics.js";
 import Blog from "../models/BlogModel.js";
 import User from "../models/userModel.js";
 
@@ -19,8 +20,26 @@ export const getBlog = async (req, res) => {
 
 export const getlatestBlog = async (req, res) => {
   try {
-    const blogs = await Blog.find({ status: { $ne: "draft" } }).sort({ createdAt: -1 }).limit(10);
-    res.status(200).json({ success: true, blogs });
+    const { tag, category } = req.query;
+    const { topics, error } = parseTopics({
+      category,
+      tags: tag === undefined ? undefined : [tag],
+    });
+    if (error) return res.status(400).json({ success: false, message: error });
+    const published = { status: { $ne: "draft" } };
+    const filter = { ...published };
+    if (topics.category) filter.category = topics.category;
+    if (topics.tags?.length) filter.tags = topics.tags[0];
+    const [blogs, categories, tags] = await Promise.all([
+      Blog.find(filter).populate("writtenBy", "username profilePic").sort({ createdAt: -1 }).limit(10),
+      Blog.distinct("category", published),
+      Blog.distinct("tags", published),
+    ]);
+    res.status(200).json({
+      success: true,
+      blogs,
+      topics: { categories: categories.filter(Boolean).sort(), tags: tags.filter(Boolean).sort() },
+    });
   } catch (error) {
     console.error(`Error in getlatestBlog route ${error}`);
     res.status(500).json({ success: false, message: "Internal Server error" });
@@ -78,6 +97,8 @@ export const oneBlog = async (req, res) => {
 
 export const createBlog = async (req, res) => {
   try {
+    const { topics, error } = parseTopics(req.body);
+    if (error) return res.status(400).json({ success: false, message: error });
     const userId = req.user._id;
     const { title = "", article = "", status = "published", articleFormat = "plain" } = req.body;
     if (!["plain", "markdown"].includes(articleFormat) || !["draft", "published"].includes(status) || typeof title !== "string" || typeof article !== "string") {
@@ -86,7 +107,7 @@ export const createBlog = async (req, res) => {
     if (status === "published" && (!title.trim() || !article.trim())) {
       return res.status(400).json({ success: false, message: "Title and article are required to publish" });
     }
-    const blog = await Blog.create({ title, article, status, articleFormat, writtenBy: userId });
+    const blog = await Blog.create({ title, article, status, articleFormat, ...topics, writtenBy: userId });
     res.status(201).json({ success: true, message: "Blog created", blog });
   } catch (error) {
     console.error(`Error in createBlog route ${error}`);
@@ -98,6 +119,8 @@ export const updateBlog = async (req, res) => {
   try {
     const userId = req.user._id;
     const blogId = req.params.id;
+    const { topics, error } = parseTopics(req.body);
+    if (error) return res.status(400).json({ success: false, message: error });
     const { title, article, status, articleFormat } = req.body;
     if ((articleFormat !== undefined && !["plain", "markdown"].includes(articleFormat)) ||
         (title !== undefined && typeof title !== "string") ||
@@ -109,6 +132,7 @@ export const updateBlog = async (req, res) => {
     if (!blog) {
       return res.status(404).json({ success: false, message: "Blog not found" });
     }
+    Object.assign(blog, topics);
     if (articleFormat !== undefined) blog.articleFormat = articleFormat;
     if (title !== undefined) blog.title = title;
     if (article !== undefined) blog.article = article;

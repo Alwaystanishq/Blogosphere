@@ -17,6 +17,13 @@ const blogSchema = new mongoose.Schema(
       enum: ["plain", "markdown"],
       default: "plain",
     },
+    category: { type: String, trim: true, lowercase: true, maxlength: 60, default: "", index: true },
+    tags: {
+      type: [{ type: String, trim: true, lowercase: true, maxlength: 30 }],
+      default: [],
+      validate: { validator: (tags) => tags.length <= 5, message: "Use up to 5 tags" },
+      index: true,
+    },
     status: {
       type: String,
       enum: ["draft", "published"],

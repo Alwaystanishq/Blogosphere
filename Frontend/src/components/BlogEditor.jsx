@@ -16,10 +16,13 @@ export default function BlogEditor({ id, initialBlog = {} }) {
       return null;
     }
   });
-  const [form, setForm] = useState(recovered || {
+  const [form, setForm] = useState({
     title: initialBlog.title || "",
     article: initialBlog.article || "",
     articleFormat: initialBlog.articleFormat || (id ? "plain" : "markdown"),
+    category: initialBlog.category || "",
+    tagsInput: (initialBlog.tags || []).join(", "),
+    ...recovered,
   });
   const [recoveryMessage, setRecoveryMessage] = useState(recovered ? "Recovered your unfinished writing from this browser." : "Changes are saved automatically in this browser.");
   const [saving, setSaving] = useState(false);
@@ -57,10 +60,19 @@ export default function BlogEditor({ id, initialBlog = {} }) {
       setError("A title and article are required to publish.");
       return;
     }
+    const tags = [...new Set(form.tagsInput.split(",").map((tag) => tag.trim().toLowerCase()).filter(Boolean))];
+    if (tags.length > 5 || tags.some((tag) => tag.length > 30)) {
+      setError("Use up to 5 tags, with at most 30 characters each.");
+      return;
+    }
+    if (form.category.trim().toLowerCase().length > 60) {
+      setError("Category must have at most 60 characters.");
+      return;
+    }
     setSaving(true);
     setError("");
     try {
-      const payload = { title: form.title, article: form.article, articleFormat: form.articleFormat || initialBlog.articleFormat || (id ? "plain" : "markdown"), status };
+      const payload = { title: form.title, article: form.article, category: form.category.trim(), tags, articleFormat: form.articleFormat || initialBlog.articleFormat || (id ? "plain" : "markdown"), status };
       if (id) await api.patch(`/blogs/${id}`, payload);
       else await api.post("/blogs", payload);
       try { localStorage.removeItem(storageKey); } catch { /* Storage may be disabled. */ }
@@ -84,6 +96,17 @@ export default function BlogEditor({ id, initialBlog = {} }) {
             <div>
               <label htmlFor="blog-title" className="block mb-2 font-semibold text-zinc-700">Blog Title</label>
               <input id="blog-title" name="title" value={form.title} onChange={handleChange} placeholder="Enter an engaging title..." className="w-full border border-zinc-300 px-4 py-3 rounded-xl" />
+            </div>
+            <div className="grid gap-6 md:grid-cols-2">
+              <div>
+                <label htmlFor="blog-category" className="block mb-2 font-semibold text-zinc-700">Category (optional)</label>
+                <input id="blog-category" name="category" value={form.category} onChange={handleChange} maxLength={60} placeholder="e.g. Technology" className="w-full border border-zinc-300 px-4 py-3 rounded-xl" />
+              </div>
+              <div>
+                <label htmlFor="blog-tags" className="block mb-2 font-semibold text-zinc-700">Tags (optional)</label>
+                <input id="blog-tags" name="tagsInput" value={form.tagsInput} onChange={handleChange} aria-describedby="tags-help" placeholder="react, javascript, tutorials" className="w-full border border-zinc-300 px-4 py-3 rounded-xl" />
+                <p id="tags-help" className="text-sm text-zinc-500 mt-2">Up to 5 tags, separated by commas. Maximum 30 characters each.</p>
+              </div>
             </div>
             <MarkdownEditor value={form.article} format={form.articleFormat || initialBlog.articleFormat || (id ? "plain" : "markdown")} onChange={(article, articleFormat) => updateForm({ article, articleFormat })} />
             <div className="flex flex-wrap justify-end gap-3">

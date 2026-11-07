@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
+import BlogTopics from "../components/BlogTopics";
 import ArticleContent from "../components/ArticleContent";
 import api from "../api/api";
 import { useAuth } from "../context/AuthContext";
@@ -79,6 +80,8 @@ function Blog() {
         <h1 className="text-4xl md:text-5xl font-bold text-indigo-600 mb-6 leading-tight">
           {blog.title}
         </h1>
+
+        <BlogTopics category={blog.category} tags={blog.tags} />
 
         {/* Author + Like */}
         <div className="flex justify-between items-center mb-10 pb-6 border-b border-zinc-200">
