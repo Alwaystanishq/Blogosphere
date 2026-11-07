@@ -53,7 +53,7 @@ Use a current Node.js release compatible with Vite 7 (Node 20.19+ or 22.12+) and
    npm install
    ```
 
-2. Create `Backend/.env`:
+2. Copy `Backend/.env.example` to `Backend/.env` and update the MongoDB URI and JWT secret:
 
    ```dotenv
    PORT=5000
