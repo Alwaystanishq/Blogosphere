@@ -23,6 +23,9 @@ export function connectRedis() {
       },
     });
     client.on("error", warn);
+    client.on("ready", () => {
+      console.log("Redis connected");
+    });
     const connecting = client;
     connecting.connect().catch(() => {
       warn();
