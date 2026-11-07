@@ -23,18 +23,26 @@ export const getBlog = async (req, res) => {
 export const getlatestBlog = async (req, res) => {
   try {
     const { tag, category } = req.query;
+    const sort = req.query.sort === "popular" ? "popular" : "newest";
     const { topics, error } = parseTopics({
       category,
       tags: tag === undefined ? undefined : [tag],
     });
     if (error) return res.status(400).json({ success: false, message: error });
-    const payload = await cachedFeed("latest", [topics.category || "", topics.tags?.[0] || ""], async () => {
+    const payload = await cachedFeed("latest", [topics.category || "", topics.tags?.[0] || "", sort], async () => {
       const published = { status: { $ne: "draft" } };
       const filter = { ...published };
       if (topics.category) filter.category = topics.category;
       if (topics.tags?.length) filter.tags = topics.tags[0];
       const [blogs, categories, tags] = await Promise.all([
-        Blog.find(filter).populate("writtenBy", "username profilePic").sort({ createdAt: -1 }).limit(10),
+        sort === "popular"
+          ? Blog.aggregate([
+            { $match: filter },
+            { $addFields: { likesCount: { $size: { $ifNull: ["$likedBy", []] } } } },
+            { $sort: { likesCount: -1, createdAt: -1, _id: -1 } },
+            { $limit: 10 },
+          ]).then((blogs) => Blog.populate(blogs, { path: "writtenBy", select: "username profilePic" }))
+          : Blog.find(filter).populate("writtenBy", "username profilePic").sort({ createdAt: -1, _id: -1 }).limit(10),
         Blog.distinct("category", published),
         Blog.distinct("tags", published),
       ]);
