@@ -1,8 +1,11 @@
 import { Link, Navigate } from "react-router-dom";
+import useReveal from "../hooks/useReveal";
 import { useAuth } from "../context/AuthContext";
 
 function Home() {
   const { user, loading } = useAuth();
+
+  const scope = useReveal(!loading && !user);
 
   if (loading) {
     return (
@@ -17,29 +20,29 @@ function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-emerald-50">
+    <div ref={scope} className="editorial-home min-h-screen">
       <div className="max-w-7xl mx-auto px-6 py-20">
         <div className="grid lg:grid-cols-2 gap-16 items-center">
           
           {/* Left Side */}
           <div>
-            <span className="bg-indigo-100 text-indigo-600 px-4 py-2 rounded-full text-sm font-semibold">
-              ✍️ Write • Read • Connect
+            <span data-intro className="bg-indigo-100 text-indigo-600 px-4 py-2 rounded-full text-sm font-semibold">
+              A HOME FOR CURIOUS MINDS
             </span>
 
-            <h1 className="text-5xl md:text-7xl font-bold mt-6 leading-tight">
-              Share Your
+            <h1 data-intro className="text-5xl md:text-7xl font-bold mt-6 leading-tight">
+              Ideas worth
               <span className="block text-indigo-600">
-                Stories With The World
+                putting into words.
               </span>
             </h1>
 
-            <p className="text-zinc-600 text-lg mt-6 leading-8 max-w-xl">
+            <p data-intro className="text-zinc-600 text-lg mt-6 leading-8 max-w-xl">
               Blogosphere is a place where writers and readers connect.
               Publish articles, discover ideas, and build your personal brand.
             </p>
 
-            <div className="flex flex-wrap gap-4 mt-10">
+            <div data-intro className="flex flex-wrap gap-4 mt-10">
               <Link
                 to="/signup"
                 className="bg-emerald-500 hover:bg-emerald-600 text-white px-8 py-4 rounded-xl font-semibold transition shadow-lg"
@@ -58,27 +61,27 @@ function Home() {
 
           {/* Right Side */}
           <div className="grid gap-5">
-            <div className="bg-white p-6 rounded-3xl shadow-lg border border-zinc-100">
+            <div data-reveal className="home-feature bg-white p-6 rounded-3xl border border-zinc-100">
               <h3 className="text-xl font-bold text-indigo-600 mb-2">
-                📝 Publish Blogs
+                01 / Share your perspective
               </h3>
               <p className="text-zinc-600">
                 Write articles and share your thoughts with thousands of readers.
               </p>
             </div>
 
-            <div className="bg-white p-6 rounded-3xl shadow-lg border border-zinc-100">
+            <div data-reveal className="home-feature bg-white p-6 rounded-3xl border border-zinc-100">
               <h3 className="text-xl font-bold text-rose-500 mb-2">
-                ❤️ Engage With Content
+                02 / Follow your curiosity
               </h3>
               <p className="text-zinc-600">
                 Discover blogs, like your favorites, and explore new ideas.
               </p>
             </div>
 
-            <div className="bg-white p-6 rounded-3xl shadow-lg border border-zinc-100">
+            <div data-reveal className="home-feature bg-white p-6 rounded-3xl border border-zinc-100">
               <h3 className="text-xl font-bold text-emerald-600 mb-2">
-                👤 Build Your Profile
+                03 / Find your people
               </h3>
               <p className="text-zinc-600">
                 Create a unique identity and showcase your published work.

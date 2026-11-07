@@ -61,7 +61,7 @@ function MyBlogs() {
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between md:items-center gap-4 mb-10">
         <div>
-          <h1 className="text-4xl font-bold text-indigo-600 mb-2">My Blogs</h1>
+          <h1 className="text-4xl font-bold text-indigo-600 mb-2">Your stories.</h1>
 
           <p className="text-zinc-500">
             Manage your private drafts and published articles.
@@ -89,7 +89,7 @@ function MyBlogs() {
           </button>
         </div>
       ) : (
-        <div className="space-y-6">
+        <div className="stories-grid">
           {blogs.map((blog) => (
             <BlogCard
               key={blog._id}

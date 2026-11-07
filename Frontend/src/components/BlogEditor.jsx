@@ -88,6 +88,7 @@ export default function BlogEditor({ id, initialBlog = {} }) {
     }
   };
 
+  const wordCount = form.article.trim().split(/\s+/).filter(Boolean).length;
   const isPublished = initialBlog.status !== "draft" && Boolean(id);
   return (
     <div className="max-w-4xl mx-auto px-4 pt-20 pb-10">
@@ -114,7 +115,8 @@ export default function BlogEditor({ id, initialBlog = {} }) {
               </div>
             </div>
             <MarkdownEditor value={form.article} format={form.articleFormat || initialBlog.articleFormat || (id ? "plain" : "markdown")} onChange={(article, articleFormat) => updateForm({ article, articleFormat })} />
-            <div className="flex flex-wrap justify-end gap-3">
+            <div className="editor-actions flex flex-wrap items-center justify-end gap-3">
+              <p className="mr-auto text-sm text-zinc-500" role="status">{wordCount} words · {Math.max(1, Math.ceil(wordCount / 200))} min read</p>
               {!isPublished && <button type="button" disabled={uploadingCover} onClick={() => save("draft")} className="bg-indigo-100 text-indigo-700 px-6 py-3 rounded-xl font-semibold">Save Draft</button>}
               <button type="submit" disabled={uploadingCover} className="bg-emerald-500 text-white px-6 py-3 rounded-xl font-semibold">{saving ? "Saving..." : isPublished ? "Update Blog" : "Publish Blog"}</button>
             </div>

@@ -19,6 +19,7 @@ function App() {
   return (
     <>
       <Navbar />
+      <main id="main-content" tabIndex={-1}>
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
@@ -34,6 +35,7 @@ function App() {
         </Route>
         <Route path="*" element={<NotFound />} />
       </Routes>
+      </main>
     </>
   );
 }

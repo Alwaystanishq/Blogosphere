@@ -17,6 +17,7 @@ function Signup() {
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
@@ -66,8 +67,8 @@ function Signup() {
   };
 
   return (
-    <div className="min-h-screen flex justify-center items-center px-4 bg-gradient-to-b from-indigo-50 to-white">
-      <div className="bg-white border border-zinc-200 rounded-3xl shadow-lg p-8 w-full max-w-md">
+    <div className="auth-page">
+      <div className="auth-card">
         {/* Heading */}
         <h2 className="text-3xl font-bold text-center text-indigo-600 mb-2">
           Join Blogosphere
@@ -78,14 +79,17 @@ function Signup() {
         </p>
 
         {error && (
-          <div className="bg-red-100 text-red-600 px-4 py-3 rounded-xl mb-6">
+          <div role="alert" className="bg-red-100 text-red-600 px-4 py-3 rounded-xl mb-6">
             {error}
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-5">
+        <form onSubmit={handleSubmit} aria-busy={loading} className="auth-form space-y-5">
+          <label className="form-label" htmlFor="signup-name">Full name</label>
           <input
             type="text"
+            id="signup-name"
+            autoComplete="name"
             name="name"
             placeholder="Full Name"
             required
@@ -94,8 +98,11 @@ function Signup() {
             className="w-full border border-zinc-300 px-4 py-3 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition"
           />
 
+          <label className="form-label" htmlFor="signup-username">Username</label>
           <input
             type="text"
+            id="signup-username"
+            autoComplete="username"
             name="username"
             placeholder="Username"
             required
@@ -104,8 +111,11 @@ function Signup() {
             className="w-full border border-zinc-300 px-4 py-3 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition"
           />
 
+          <label className="form-label" htmlFor="signup-email">Email address</label>
           <input
             type="email"
+            id="signup-email"
+            autoComplete="email"
             name="email"
             placeholder="Email Address"
             required
@@ -114,8 +124,11 @@ function Signup() {
             className="w-full border border-zinc-300 px-4 py-3 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition"
           />
 
+          <label className="form-label" htmlFor="signup-password">Password</label>
           <input
-            type="password"
+            type={showPassword ? "text" : "password"}
+            id="signup-password"
+            autoComplete="new-password"
             name="password"
             placeholder="Password"
             required
@@ -123,14 +136,16 @@ function Signup() {
             onChange={handleChange}
             className="w-full border border-zinc-300 px-4 py-3 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition"
           />
+          <button type="button" className="password-toggle" aria-pressed={showPassword} onClick={() => setShowPassword(!showPassword)}>{showPassword ? "Hide password" : "Show password"}</button>
 
           <div>
-            <label className="block text-sm font-medium text-zinc-600 mb-2">
+            <label htmlFor="signup-picture" className="block text-sm font-medium text-zinc-600 mb-2">
               Profile Picture (Optional)
             </label>
 
             <input
               type="file"
+              id="signup-picture"
               name="profilePic"
               accept="image/*"
               onChange={handleChange}

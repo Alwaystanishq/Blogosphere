@@ -40,7 +40,7 @@ function FilteredBlogs({ category, tag, onFilter, onClear }) {
       {!result ? <p role="status" className="text-center text-indigo-600">Loading latest blogs...</p>
         : result.error ? <p role="alert" className="text-center text-red-500">{result.error}</p>
         : result.blogs.length === 0 ? <div role="status" className="bg-white border border-zinc-200 rounded-2xl p-8 text-center text-zinc-500">{category || tag ? "No published blogs match these topics. Try another filter." : "No blogs found."}</div>
-        : <div className="space-y-6">{result.blogs.map((blog) => <BlogCard key={blog._id} blog={blog} />)}</div>}
+        : <div className="stories-grid">{result.blogs.map((blog) => <BlogCard key={blog._id} blog={blog} />)}</div>}
     </>
   );
 }
@@ -63,8 +63,8 @@ export default function LatestBlogs() {
   };
   return (
     <div className="max-w-6xl mx-auto px-4 pt-20 pb-10">
-      <div className="mb-10">
-        <h1 className="text-4xl font-bold text-indigo-600 mb-2">Latest Blogs</h1>
+      <div className="page-heading mb-10">
+        <h1 className="text-4xl font-bold text-indigo-600 mb-2">Discover your next great read.</h1>
         <p className="text-zinc-500">Discover the newest stories, or browse by category and tag.</p>
       </div>
       <FilteredBlogs key={JSON.stringify([category, tag])} category={category} tag={tag} onFilter={onFilter} onClear={onClear} />

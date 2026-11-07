@@ -14,6 +14,7 @@ function Login() {
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleChange = (e) => {
     setForm({
@@ -43,8 +44,8 @@ function Login() {
   };
 
   return (
-    <div className="min-h-screen flex justify-center items-center px-4 bg-gradient-to-b from-indigo-50 to-white">
-      <div className="bg-white border border-zinc-200 rounded-3xl shadow-lg p-8 w-full max-w-md">
+    <div className="auth-page">
+      <div className="auth-card">
         {/* Heading */}
         <h2 className="text-3xl font-bold text-center text-indigo-600 mb-2">
           Welcome Back
@@ -55,15 +56,18 @@ function Login() {
         </p>
 
         {error && (
-          <div className="bg-red-100 text-red-600 px-4 py-3 rounded-xl mb-6">
+          <div role="alert" className="bg-red-100 text-red-600 px-4 py-3 rounded-xl mb-6">
             {error}
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-5">
+        <form onSubmit={handleSubmit} aria-busy={loading} className="auth-form space-y-5">
           {/* Email */}
+          <label className="form-label" htmlFor="login-email">Email address</label>
           <input
             type="email"
+            id="login-email"
+            autoComplete="email"
             name="email"
             placeholder="Email Address"
             required
@@ -73,8 +77,11 @@ function Login() {
           />
 
           {/* Password */}
+          <label className="form-label" htmlFor="login-password">Password</label>
           <input
-            type="password"
+            type={showPassword ? "text" : "password"}
+            id="login-password"
+            autoComplete="current-password"
             name="password"
             placeholder="Password"
             required
@@ -82,6 +89,7 @@ function Login() {
             onChange={handleChange}
             className="w-full border border-zinc-300 px-4 py-3 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition"
           />
+          <button type="button" className="password-toggle" aria-pressed={showPassword} onClick={() => setShowPassword(!showPassword)}>{showPassword ? "Hide password" : "Show password"}</button>
 
           {/* Login Button */}
           <button
