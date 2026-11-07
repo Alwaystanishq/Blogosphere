@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
+import ArticleContent from "../components/ArticleContent";
 import api from "../api/api";
 import { useAuth } from "../context/AuthContext";
 import { BiSolidLike } from "react-icons/bi";
@@ -123,8 +124,8 @@ function Blog() {
         </div>
 
         {/* Article */}
-        <article className="leading-9 text-lg text-zinc-700 whitespace-pre-line">
-          {blog.article}
+        <article className="leading-9 text-lg text-zinc-700">
+          <ArticleContent article={blog.article} format={blog.articleFormat} />
         </article>
       </div>
     </div>

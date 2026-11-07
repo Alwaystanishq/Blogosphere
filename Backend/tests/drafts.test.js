@@ -81,3 +81,20 @@ test("another account cannot modify a draft", async () => {
   await controller.updateBlog({ ...request({ title: "Stolen" }), user: { _id: "other" } }, res);
   assert.equal(res.code, 404);
 });
+
+
+test("Markdown format persists on create and update; unknown formats are rejected", async () => {
+  model.create = async (value) => value;
+  const created = response();
+  await controller.createBlog(request({ title: "Formatted", article: "**Content**", articleFormat: "markdown" }), created);
+  assert.equal(created.body.blog.articleFormat, "markdown");
+  const stored = { title: "Title", article: "Content", status: "draft", save: async () => {} };
+  model.findOne = async () => stored;
+  const updated = response();
+  await controller.updateBlog(request({ articleFormat: "markdown" }), updated);
+  assert.equal(updated.code, 200);
+  assert.equal(stored.articleFormat, "markdown");
+  const invalid = response();
+  await controller.createBlog(request({ title: "Title", article: "Content", articleFormat: "html" }), invalid);
+  assert.equal(invalid.code, 400);
+});

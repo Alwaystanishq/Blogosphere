@@ -12,6 +12,11 @@ const blogSchema = new mongoose.Schema(
       default: "",
       required: function () { return this.status !== "draft"; },
     },
+    articleFormat: {
+      type: String,
+      enum: ["plain", "markdown"],
+      default: "plain",
+    },
     status: {
       type: String,
       enum: ["draft", "published"],

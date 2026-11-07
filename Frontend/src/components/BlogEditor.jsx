@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import MarkdownEditor from "./MarkdownEditor";
 import api from "../api/api";
 import { useAuth } from "../context/AuthContext";
 
@@ -18,6 +19,7 @@ export default function BlogEditor({ id, initialBlog = {} }) {
   const [form, setForm] = useState(recovered || {
     title: initialBlog.title || "",
     article: initialBlog.article || "",
+    articleFormat: initialBlog.articleFormat || (id ? "plain" : "markdown"),
   });
   const [recoveryMessage, setRecoveryMessage] = useState(recovered ? "Recovered your unfinished writing from this browser." : "Changes are saved automatically in this browser.");
   const [saving, setSaving] = useState(false);
@@ -37,8 +39,8 @@ export default function BlogEditor({ id, initialBlog = {} }) {
     return () => window.removeEventListener("beforeunload", warnBeforeLeaving);
   }, [form, storageKey]);
 
-  const handleChange = (event) => {
-    const next = { ...form, [event.target.name]: event.target.value };
+  const updateForm = (changes) => {
+    const next = { ...form, ...changes };
     setForm(next);
     try {
       localStorage.setItem(storageKey, JSON.stringify(next));
@@ -48,6 +50,8 @@ export default function BlogEditor({ id, initialBlog = {} }) {
     }
   };
 
+  const handleChange = (event) => updateForm({ [event.target.name]: event.target.value });
+
   const save = async (status) => {
     if (status === "published" && (!form.title.trim() || !form.article.trim())) {
       setError("A title and article are required to publish.");
@@ -56,7 +60,7 @@ export default function BlogEditor({ id, initialBlog = {} }) {
     setSaving(true);
     setError("");
     try {
-      const payload = { title: form.title, article: form.article, status };
+      const payload = { title: form.title, article: form.article, articleFormat: form.articleFormat || initialBlog.articleFormat || (id ? "plain" : "markdown"), status };
       if (id) await api.patch(`/blogs/${id}`, payload);
       else await api.post("/blogs", payload);
       try { localStorage.removeItem(storageKey); } catch { /* Storage may be disabled. */ }
@@ -81,10 +85,7 @@ export default function BlogEditor({ id, initialBlog = {} }) {
               <label htmlFor="blog-title" className="block mb-2 font-semibold text-zinc-700">Blog Title</label>
               <input id="blog-title" name="title" value={form.title} onChange={handleChange} placeholder="Enter an engaging title..." className="w-full border border-zinc-300 px-4 py-3 rounded-xl" />
             </div>
-            <div>
-              <label htmlFor="blog-article" className="block mb-2 font-semibold text-zinc-700">Article</label>
-              <textarea id="blog-article" name="article" value={form.article} onChange={handleChange} rows="12" placeholder="Write your story here..." className="w-full border border-zinc-300 px-4 py-3 rounded-xl" />
-            </div>
+            <MarkdownEditor value={form.article} format={form.articleFormat || initialBlog.articleFormat || (id ? "plain" : "markdown")} onChange={(article, articleFormat) => updateForm({ article, articleFormat })} />
             <div className="flex flex-wrap justify-end gap-3">
               {!isPublished && <button type="button" onClick={() => save("draft")} className="bg-indigo-100 text-indigo-700 px-6 py-3 rounded-xl font-semibold">Save Draft</button>}
               <button type="submit" className="bg-emerald-500 text-white px-6 py-3 rounded-xl font-semibold">{saving ? "Saving..." : isPublished ? "Update Blog" : "Publish Blog"}</button>

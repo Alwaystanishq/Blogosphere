@@ -73,6 +73,8 @@ blogosphere/
 
 ### 📝 Blog System
 - Create blog
+- Write Markdown with formatting buttons for headings, emphasis, links, lists, quotes, and code
+- Switch between Write and Preview before publishing; existing plain-text posts retain their format
 - Save incomplete posts as private drafts and publish them later from My Blogs
 - Automatically recover unfinished writing in the same browser, separately for each account
 - Use Save Draft to persist writing to your account across devices
@@ -219,3 +221,6 @@ Developed by Tanishq Chauhan
 Run `node Backend/tests/drafts.test.js` to verify draft creation, publishing validation,
 owner-only access, and exclusion from discovery and likes. These checks mock the
 persistence layer; they do not require a running MongoDB instance.
+
+Run `npm run test:markdown --prefix Frontend` for Markdown rendering, safe links,
+plain-text compatibility, and formatting selection checks.

@@ -79,14 +79,14 @@ export const oneBlog = async (req, res) => {
 export const createBlog = async (req, res) => {
   try {
     const userId = req.user._id;
-    const { title = "", article = "", status = "published" } = req.body;
-    if (!["draft", "published"].includes(status) || typeof title !== "string" || typeof article !== "string") {
+    const { title = "", article = "", status = "published", articleFormat = "plain" } = req.body;
+    if (!["plain", "markdown"].includes(articleFormat) || !["draft", "published"].includes(status) || typeof title !== "string" || typeof article !== "string") {
       return res.status(400).json({ success: false, message: "Invalid blog fields" });
     }
     if (status === "published" && (!title.trim() || !article.trim())) {
       return res.status(400).json({ success: false, message: "Title and article are required to publish" });
     }
-    const blog = await Blog.create({ title, article, status, writtenBy: userId });
+    const blog = await Blog.create({ title, article, status, articleFormat, writtenBy: userId });
     res.status(201).json({ success: true, message: "Blog created", blog });
   } catch (error) {
     console.error(`Error in createBlog route ${error}`);
@@ -98,8 +98,9 @@ export const updateBlog = async (req, res) => {
   try {
     const userId = req.user._id;
     const blogId = req.params.id;
-    const { title, article, status } = req.body;
-    if ((title !== undefined && typeof title !== "string") ||
+    const { title, article, status, articleFormat } = req.body;
+    if ((articleFormat !== undefined && !["plain", "markdown"].includes(articleFormat)) ||
+        (title !== undefined && typeof title !== "string") ||
         (article !== undefined && typeof article !== "string") ||
         (status !== undefined && !["draft", "published"].includes(status))) {
       return res.status(400).json({ success: false, message: "Invalid blog fields" });
@@ -108,6 +109,7 @@ export const updateBlog = async (req, res) => {
     if (!blog) {
       return res.status(404).json({ success: false, message: "Blog not found" });
     }
+    if (articleFormat !== undefined) blog.articleFormat = articleFormat;
     if (title !== undefined) blog.title = title;
     if (article !== undefined) blog.article = article;
     if (status !== undefined) blog.status = status;
