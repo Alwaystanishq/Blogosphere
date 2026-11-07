@@ -1,3 +1,4 @@
+import { imageUrl } from "../utils/imageUrl";
 import BlogTopics from "./BlogTopics";
 import { BiSolidLike } from "react-icons/bi";
 import { Link, useNavigate } from "react-router-dom";
@@ -14,6 +15,7 @@ function BlogCard({ blog, showActions = false, onEdit, onDelete }) {
       onClick={handleClick}
       className="bg-white border border-zinc-200 rounded-2xl p-5 shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer"
     >
+      {blog.coverImage && <img src={imageUrl(blog.coverImage)} alt="" loading="lazy" className="w-full h-48 md:h-60 object-cover rounded-xl mb-5" />}
       {/* Top Section */}
       <div className="flex justify-between items-start gap-4">
         <div className="flex-1">

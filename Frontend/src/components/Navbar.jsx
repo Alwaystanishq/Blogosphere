@@ -20,7 +20,7 @@ function Navbar() {
 
     if (!search.trim()) return;
 
-    navigate(`/search?q=${search}`);
+    navigate(`/search?${new URLSearchParams({ q: search.trim() })}`);
     setSearch("");
     setOpen(false);
   };

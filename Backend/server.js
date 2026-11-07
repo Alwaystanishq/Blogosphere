@@ -1,4 +1,5 @@
 import express from "express";
+import { fileURLToPath } from "node:url";
 import dotenv from "dotenv";
 import cors from "cors";
 import cookieParser from "cookie-parser";
@@ -17,7 +18,7 @@ app.use(
 );
 app.use(cookieParser());
 app.use(express.json());
-app.use("/uploads", express.static("uploads"));
+app.use("/uploads", express.static(fileURLToPath(new URL("./uploads/", import.meta.url))));
 const port = process.env.PORT || 5000;
 connectDB();
 

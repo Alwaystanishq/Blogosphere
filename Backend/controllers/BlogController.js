@@ -1,4 +1,5 @@
 import { parseTopics } from "../utils/blogTopics.js";
+import Comment from "../models/CommentModel.js";
 import Blog from "../models/BlogModel.js";
 import User from "../models/userModel.js";
 
@@ -59,6 +60,7 @@ export const deleteBlog = async (req, res) => {
         .status(404)
         .json({ success: false, message: "Blog not found" });
     }
+    await Comment.deleteMany({ blog: blogId });
     res.status(200).json({ success: true, message: "Blog Deleted" });
   } catch (error) {
     console.error(`Error in deleteBlog route ${error}`);
@@ -97,6 +99,10 @@ export const oneBlog = async (req, res) => {
 
 export const createBlog = async (req, res) => {
   try {
+    const { coverImage } = req.body;
+    if (coverImage !== undefined && (typeof coverImage !== "string" || (coverImage !== "" && !/^\/uploads\/cover-[a-f0-9-]+\.(png|jpg|webp)$/.test(coverImage)))) {
+      return res.status(400).json({ success: false, message: "Upload a valid cover image first" });
+    }
     const { topics, error } = parseTopics(req.body);
     if (error) return res.status(400).json({ success: false, message: error });
     const userId = req.user._id;
@@ -107,7 +113,7 @@ export const createBlog = async (req, res) => {
     if (status === "published" && (!title.trim() || !article.trim())) {
       return res.status(400).json({ success: false, message: "Title and article are required to publish" });
     }
-    const blog = await Blog.create({ title, article, status, articleFormat, ...topics, writtenBy: userId });
+    const blog = await Blog.create({ title, article, status, articleFormat, coverImage, ...topics, writtenBy: userId });
     res.status(201).json({ success: true, message: "Blog created", blog });
   } catch (error) {
     console.error(`Error in createBlog route ${error}`);
@@ -119,6 +125,10 @@ export const updateBlog = async (req, res) => {
   try {
     const userId = req.user._id;
     const blogId = req.params.id;
+    const { coverImage } = req.body;
+    if (coverImage !== undefined && (typeof coverImage !== "string" || (coverImage !== "" && !/^\/uploads\/cover-[a-f0-9-]+\.(png|jpg|webp)$/.test(coverImage)))) {
+      return res.status(400).json({ success: false, message: "Upload a valid cover image first" });
+    }
     const { topics, error } = parseTopics(req.body);
     if (error) return res.status(400).json({ success: false, message: error });
     const { title, article, status, articleFormat } = req.body;
@@ -133,6 +143,7 @@ export const updateBlog = async (req, res) => {
       return res.status(404).json({ success: false, message: "Blog not found" });
     }
     Object.assign(blog, topics);
+    if (coverImage !== undefined) blog.coverImage = coverImage;
     if (articleFormat !== undefined) blog.articleFormat = articleFormat;
     if (title !== undefined) blog.title = title;
     if (article !== undefined) blog.article = article;
@@ -154,17 +165,27 @@ export const updateBlog = async (req, res) => {
 
 export const searchBlog = async (req, res) => {
   try {
-    const q = req.query.q;
-    if (!q || q.trim() === "") {
-      return res.status(400).json({
-        success: false,
-        message: "Search query is required",
-      });
+    const { q = "", category, tag, sort = "newest" } = req.query;
+    if (typeof q !== "string" || q.length > 200 || !["newest", "oldest", "popular"].includes(sort)) {
+      return res.status(400).json({ success: false, message: "Use a search query up to 200 characters and a valid sort order" });
     }
-    const results = await Blog.find({
-      title: { $regex: q, $options: "i" },
-      status: { $ne: "draft" },
-    });
+    const { topics, error } = parseTopics({ category, tags: tag === undefined ? undefined : [tag] });
+    if (error) return res.status(400).json({ success: false, message: error });
+    const filter = { status: { $ne: "draft" } };
+    if (topics.category) filter.category = topics.category;
+    if (topics.tags?.length) filter.tags = topics.tags[0];
+    if (q.trim()) {
+      const pattern = q.trim().replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      const matches = { $regex: pattern, $options: "i" };
+      const authors = await User.find({ $or: [{ username: matches }, { name: matches }] }).select("_id");
+      filter.$or = [{ title: matches }, { article: matches }, { category: matches }, { tags: matches }, { writtenBy: { $in: authors.map((author) => author._id) } }];
+    }
+    const results = await Blog.aggregate([
+      { $match: filter },
+      { $addFields: { likesCount: { $size: { $ifNull: ["$likedBy", []] } } } },
+      { $sort: sort === "popular" ? { likesCount: -1, createdAt: -1, _id: -1 } : { createdAt: sort === "oldest" ? 1 : -1, _id: sort === "oldest" ? 1 : -1 } },
+    ]);
+    await Blog.populate(results, { path: "writtenBy", select: "username profilePic" });
     res.status(200).json({ success: true, results });
   } catch (error) {
     console.error(`Error in searchBlog route ${error}`);

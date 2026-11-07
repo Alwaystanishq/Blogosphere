@@ -1,79 +1,80 @@
 import { useEffect, useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import api from "../api/api";
 import BlogCard from "../components/BlogCard";
 
-function Search() {
-  const location = useLocation();
-  const queryParams = new URLSearchParams(location.search);
-  const q = queryParams.get("q");
-
-  const [blogs, setBlogs] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-
+function SearchView({ filters, onSearch, onClear }) {
+  const [form, setForm] = useState(filters);
+  const [result, setResult] = useState(null);
+  const [topics, setTopics] = useState({ categories: [], tags: [] });
+  const { q, category, tag, sort } = filters;
   useEffect(() => {
-    const fetchSearch = async () => {
-      try {
-        const res = await api.get(`/blogs/search?q=${q}`);
-
-        if (res.data.success) {
-          setBlogs(res.data.results || []);
-        }
-      } catch (err) {
-        setError(err.response?.data?.message || "Failed to search blogs");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (q) {
-      fetchSearch();
-    } else {
-      setLoading(false);
-    }
-  }, [q]);
-
-  if (loading) {
-    return (
-      <div className="text-center pt-24 text-indigo-600 font-medium">
-        Searching...
+    const controller = new AbortController();
+    api.get("/blogs/search", { params: { q, category, tag, sort }, signal: controller.signal }).then(({ data }) => {
+      setResult({ blogs: data.results || [] });
+    }).catch((err) => {
+      if (!controller.signal.aborted) setResult({ error: err.response?.data?.message || "Failed to search blogs" });
+    });
+    api.get("/blogs/latest", { signal: controller.signal }).then(({ data }) => setTopics(data.topics || { categories: [], tags: [] })).catch(() => {});
+    return () => controller.abort();
+  }, [q, category, tag, sort]);
+  const change = (event) => setForm({ ...form, [event.target.name]: event.target.value });
+  const options = (values, current) => [...new Set([...values, ...(current ? [current] : [])])].sort();
+  return <>
+    <form onSubmit={(event) => { event.preventDefault(); onSearch(form); }} className="bg-white border border-zinc-200 rounded-2xl p-5 mb-8 space-y-4">
+      <div>
+        <label htmlFor="search-query" className="block font-semibold text-zinc-700 mb-2">Search</label>
+        <input id="search-query" name="q" value={form.q} onChange={change} maxLength={200} placeholder="Search titles, articles, authors, or topics" className="w-full border border-zinc-300 rounded-xl p-3" />
       </div>
-    );
-  }
-
-  if (error) {
-    return <div className="text-center pt-24 text-red-500">{error}</div>;
-  }
-
-  return (
-    <div className="max-w-6xl mx-auto px-4 pt-20 pb-10">
-      {/* Header */}
-      <div className="mb-10">
-        <h1 className="text-4xl font-bold text-indigo-600 mb-2">
-          Search Results
-        </h1>
-
-        <p className="text-zinc-500">
-          Showing results for{" "}
-          <span className="font-semibold text-zinc-700">"{q}"</span>
-        </p>
+      <div className="grid gap-4 sm:grid-cols-3">
+        <label className="text-sm font-medium text-zinc-700">Category
+          <select name="category" value={form.category} onChange={change} className="block w-full border border-zinc-300 rounded-xl p-3 mt-2">
+            <option value="">All categories</option>
+            {options(topics.categories, form.category).map((value) => <option key={value} value={value}>{value}</option>)}
+          </select>
+        </label>
+        <label className="text-sm font-medium text-zinc-700">Tag
+          <select name="tag" value={form.tag} onChange={change} className="block w-full border border-zinc-300 rounded-xl p-3 mt-2">
+            <option value="">All tags</option>
+            {options(topics.tags, form.tag).map((value) => <option key={value} value={value}>#{value}</option>)}
+          </select>
+        </label>
+        <label className="text-sm font-medium text-zinc-700">Sort by
+          <select name="sort" value={form.sort} onChange={change} className="block w-full border border-zinc-300 rounded-xl p-3 mt-2">
+            <option value="newest">Newest first</option><option value="oldest">Oldest first</option><option value="popular">Most liked</option>
+          </select>
+        </label>
       </div>
-
-      {/* Results */}
-      {blogs.length === 0 ? (
-        <div className="bg-white border border-zinc-200 rounded-2xl p-8 text-center shadow-sm">
-          <p className="text-zinc-500">No blogs found matching "{q}".</p>
-        </div>
-      ) : (
-        <div className="space-y-6">
-          {blogs.map((blog) => (
-            <BlogCard key={blog._id} blog={blog} />
-          ))}
-        </div>
-      )}
-    </div>
-  );
+      <div className="flex gap-4">
+        <button className="rounded-xl bg-indigo-600 text-white px-5 py-3 font-semibold">Search blogs</button>
+        <button type="button" onClick={onClear} className="text-indigo-600 hover:underline">Clear search</button>
+      </div>
+    </form>
+    {!result ? <p role="status" className="text-center text-indigo-600">Searching...</p> : result.error ? <p role="alert" className="text-center text-red-600">{result.error}</p> : <>
+      <p role="status" className="text-zinc-500 mb-4">{result.blogs.length} {result.blogs.length === 1 ? "post" : "posts"} found{q ? ` for “${q}”` : ""}.</p>
+      {result.blogs.length === 0 ? <div className="border border-zinc-200 rounded-2xl bg-white p-8 text-center text-zinc-500">No matching posts. Try different words or clear the filters.</div> : <div className="space-y-6">{result.blogs.map((blog) => <BlogCard key={blog._id} blog={blog} />)}</div>}
+    </>}
+  </>;
 }
 
-export default Search;
+export default function Search() {
+  const [params, setParams] = useSearchParams();
+  const [revision, setRevision] = useState(0);
+  const filters = {
+    q: params.get("q") || "",
+    category: params.get("category") || "",
+    tag: params.get("tag") || "",
+    sort: params.get("sort") || "newest",
+  };
+  const onSearch = (form) => {
+    const next = new URLSearchParams();
+    for (const [key, value] of Object.entries(form)) if (value.trim()) next.set(key, value.trim());
+    setParams(next);
+    setRevision((current) => current + 1);
+  };
+  return <div className="max-w-6xl mx-auto px-4 pt-20 pb-10">
+    <h1 className="text-4xl font-bold text-indigo-600 mb-2">Search Blogs</h1>
+    <p className="text-zinc-500 mb-8">Find published stories by title, content, author, category, or tag.</p>
+    <SearchView key={`${params.toString()}:${revision}`} filters={filters} onSearch={onSearch} onClear={() => { setParams({}); setRevision((current) => current + 1); }} />
+  </div>;
+}

@@ -17,6 +17,7 @@ const blogSchema = new mongoose.Schema(
       enum: ["plain", "markdown"],
       default: "plain",
     },
+    coverImage: { type: String, default: "" },
     category: { type: String, trim: true, lowercase: true, maxlength: 60, default: "", index: true },
     tags: {
       type: [{ type: String, trim: true, lowercase: true, maxlength: 30 }],

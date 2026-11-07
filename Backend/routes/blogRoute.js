@@ -1,4 +1,6 @@
 import express from "express";
+import { uploadCover } from "../middlewares/coverUpload.js";
+import { getComments, addComment, deleteComment } from "../controllers/commentController.js";
 import {
   createBlog,
   deleteBlog,
@@ -18,6 +20,10 @@ const router = express.Router();
 router.get("/", getBlog);
 router.get("/latest", getlatestBlog);
 router.post("/", createBlog);
+router.post("/cover", uploadCover);
+router.get("/:id/comments", getComments);
+router.post("/:id/comments", addComment);
+router.delete("/:id/comments/:commentId", deleteComment);
 router.get("/search", searchBlog);
 router.get("/liked", getLikedBlog);
 router.get("/topLiked", getTopLikedBlog);

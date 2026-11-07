@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import CoverImageInput from "./CoverImageInput";
 import MarkdownEditor from "./MarkdownEditor";
 import api from "../api/api";
 import { useAuth } from "../context/AuthContext";
@@ -20,11 +21,13 @@ export default function BlogEditor({ id, initialBlog = {} }) {
     title: initialBlog.title || "",
     article: initialBlog.article || "",
     articleFormat: initialBlog.articleFormat || (id ? "plain" : "markdown"),
+    coverImage: initialBlog.coverImage || "",
     category: initialBlog.category || "",
     tagsInput: (initialBlog.tags || []).join(", "),
     ...recovered,
   });
   const [recoveryMessage, setRecoveryMessage] = useState(recovered ? "Recovered your unfinished writing from this browser." : "Changes are saved automatically in this browser.");
+  const [uploadingCover, setUploadingCover] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
@@ -56,6 +59,7 @@ export default function BlogEditor({ id, initialBlog = {} }) {
   const handleChange = (event) => updateForm({ [event.target.name]: event.target.value });
 
   const save = async (status) => {
+    if (uploadingCover || saving) return;
     if (status === "published" && (!form.title.trim() || !form.article.trim())) {
       setError("A title and article are required to publish.");
       return;
@@ -72,7 +76,7 @@ export default function BlogEditor({ id, initialBlog = {} }) {
     setSaving(true);
     setError("");
     try {
-      const payload = { title: form.title, article: form.article, category: form.category.trim(), tags, articleFormat: form.articleFormat || initialBlog.articleFormat || (id ? "plain" : "markdown"), status };
+      const payload = { title: form.title, article: form.article, category: form.category.trim(), tags, coverImage: form.coverImage, articleFormat: form.articleFormat || initialBlog.articleFormat || (id ? "plain" : "markdown"), status };
       if (id) await api.patch(`/blogs/${id}`, payload);
       else await api.post("/blogs", payload);
       try { localStorage.removeItem(storageKey); } catch { /* Storage may be disabled. */ }
@@ -92,11 +96,12 @@ export default function BlogEditor({ id, initialBlog = {} }) {
         <p role="status" className="text-zinc-500 mb-6">{recoveryMessage}</p>
         {error && <p role="alert" className="bg-red-100 text-red-600 p-3 rounded-xl mb-6">{error}</p>}
         <form onSubmit={(event) => { event.preventDefault(); save("published"); }} className="space-y-6">
-          <fieldset disabled={saving} className="space-y-6">
+          <fieldset disabled={saving || uploadingCover} className="space-y-6">
             <div>
               <label htmlFor="blog-title" className="block mb-2 font-semibold text-zinc-700">Blog Title</label>
               <input id="blog-title" name="title" value={form.title} onChange={handleChange} placeholder="Enter an engaging title..." className="w-full border border-zinc-300 px-4 py-3 rounded-xl" />
             </div>
+            <CoverImageInput value={form.coverImage} onChange={(coverImage) => updateForm({ coverImage })} onUploading={setUploadingCover} />
             <div className="grid gap-6 md:grid-cols-2">
               <div>
                 <label htmlFor="blog-category" className="block mb-2 font-semibold text-zinc-700">Category (optional)</label>
@@ -110,8 +115,8 @@ export default function BlogEditor({ id, initialBlog = {} }) {
             </div>
             <MarkdownEditor value={form.article} format={form.articleFormat || initialBlog.articleFormat || (id ? "plain" : "markdown")} onChange={(article, articleFormat) => updateForm({ article, articleFormat })} />
             <div className="flex flex-wrap justify-end gap-3">
-              {!isPublished && <button type="button" onClick={() => save("draft")} className="bg-indigo-100 text-indigo-700 px-6 py-3 rounded-xl font-semibold">Save Draft</button>}
-              <button type="submit" className="bg-emerald-500 text-white px-6 py-3 rounded-xl font-semibold">{saving ? "Saving..." : isPublished ? "Update Blog" : "Publish Blog"}</button>
+              {!isPublished && <button type="button" disabled={uploadingCover} onClick={() => save("draft")} className="bg-indigo-100 text-indigo-700 px-6 py-3 rounded-xl font-semibold">Save Draft</button>}
+              <button type="submit" disabled={uploadingCover} className="bg-emerald-500 text-white px-6 py-3 rounded-xl font-semibold">{saving ? "Saving..." : isPublished ? "Update Blog" : "Publish Blog"}</button>
             </div>
           </fieldset>
         </form>

@@ -1,13 +1,14 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
+import Comments from "../components/Comments";
+import { imageUrl } from "../utils/imageUrl";
 import BlogTopics from "../components/BlogTopics";
 import ArticleContent from "../components/ArticleContent";
 import api from "../api/api";
 import { useAuth } from "../context/AuthContext";
 import { BiSolidLike } from "react-icons/bi";
 
-function Blog() {
-  const { id } = useParams();
+function BlogContent({ id }) {
   const { user } = useAuth();
 
   const [blog, setBlog] = useState(null);
@@ -18,9 +19,10 @@ function Blog() {
   const [error, setError] = useState("");
 
   useEffect(() => {
+    const controller = new AbortController();
     const fetchBlog = async () => {
       try {
-        const res = await api.get(`/blogs/${id}`);
+        const res = await api.get(`/blogs/${id}`, { signal: controller.signal });
 
         if (res.data.success) {
           const blogData = res.data.blog;
@@ -30,20 +32,21 @@ function Blog() {
 
           if (user) {
             const alreadyLiked = blogData.likedBy?.some(
-              (likeId) => likeId.toString() === user.id.toString(),
+              (likeId) => likeId.toString() === (user._id || user.id).toString(),
             );
 
             setLiked(alreadyLiked);
           }
         }
       } catch (err) {
-        setError(err.response?.data?.message || "Failed to load blog");
+        if (!controller.signal.aborted) setError(err.response?.data?.message || "Failed to load blog");
       } finally {
-        setLoading(false);
+        if (!controller.signal.aborted) setLoading(false);
       }
     };
 
     fetchBlog();
+    return () => controller.abort();
   }, [id, user]);
 
   const handleLike = async () => {
@@ -76,6 +79,7 @@ function Blog() {
   return (
     <div className="max-w-4xl mx-auto px-4 pt-20 pb-10">
       <div className="bg-white rounded-3xl shadow-lg border border-zinc-200 p-8">
+        {blog.coverImage && <img src={imageUrl(blog.coverImage)} alt="" className="w-full max-h-96 object-cover rounded-2xl mb-6" />}
         {/* Title */}
         <h1 className="text-4xl md:text-5xl font-bold text-indigo-600 mb-6 leading-tight">
           {blog.title}
@@ -130,9 +134,13 @@ function Blog() {
         <article className="leading-9 text-lg text-zinc-700">
           <ArticleContent article={blog.article} format={blog.articleFormat} />
         </article>
+        {blog.status !== "draft" && <Comments key={blog._id} blogId={blog._id} blogAuthorId={blog.writtenBy?._id} />}
       </div>
     </div>
   );
 }
 
-export default Blog;
+export default function Blog() {
+  const { id } = useParams();
+  return <BlogContent key={id} id={id} />;
+}
