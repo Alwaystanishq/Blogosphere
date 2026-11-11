@@ -8,6 +8,7 @@ import userRoutes from "./routes/userRoute.js";
 import blogRoutes from "./routes/blogRoute.js";
 import { connectRedis, disconnectRedis } from "./config/redis.js";
 import { connectDB } from "./config/db.js";
+import { apiLimiter } from "./middlewares/rateLimit.js";
 
 const app = express();
 dotenv.config();
@@ -17,6 +18,7 @@ app.use(
     credentials: true,
   }),
 );
+app.use("/api", apiLimiter);
 app.use(cookieParser());
 app.use(express.json());
 app.use("/uploads", express.static(fileURLToPath(new URL("./uploads/", import.meta.url))));
