@@ -11,7 +11,7 @@ import { connectDB } from "./config/db.js";
 import { apiLimiter } from "./middlewares/rateLimit.js";
 
 const app = express();
-dotenv.config();
+dotenv.config({ path: fileURLToPath(new URL("./.env", import.meta.url)) });
 app.use(
   cors({
     origin: "http://localhost:5173",
@@ -23,7 +23,12 @@ app.use(cookieParser());
 app.use(express.json());
 app.use("/uploads", express.static(fileURLToPath(new URL("./uploads/", import.meta.url))));
 const port = process.env.PORT || 5000;
-connectDB();
+try {
+  await connectDB();
+} catch {
+  console.error("MongoDB connection failed. Check MONGO_URI in Backend/.env and ensure MongoDB is running. API was not started.");
+  process.exit(1);
+}
 connectRedis();
 
 app.use("/api/user", userRoutes);
