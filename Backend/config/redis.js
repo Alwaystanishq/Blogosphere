@@ -5,16 +5,17 @@ let lastWarning = 0;
 let retryAfter = 0;
 
 function warn() {
-  if (Date.now() - lastWarning > 30000) {
-    console.warn("Redis cache unavailable; using MongoDB.");
-    lastWarning = Date.now();
-  }
+  const now = Date.now();
+  if (now - lastWarning <= 30000) return;
+  console.warn("Redis cache unavailable; using MongoDB.");
+  lastWarning = now;
 }
 
-export function connectRedis() {
+export async function connectRedis() {
   if (!process.env.REDIS_URL || client || Date.now() < retryAfter) return;
+  let connecting;
   try {
-    client = createClient({
+    connecting = createClient({
       url: process.env.REDIS_URL,
       disableOfflineQueue: true,
       socket: {
@@ -22,19 +23,13 @@ export function connectRedis() {
         reconnectStrategy: (retries) => Math.min(1000 * (retries + 1), 10000),
       },
     });
-    client.on("error", warn);
-    client.on("ready", () => {
-      console.log("Redis connected");
-    });
-    const connecting = client;
-    connecting.connect().catch(() => {
-      warn();
-      if (client === connecting) client = undefined;
-      retryAfter = Date.now() + 10000;
-    });
+    client = connecting;
+    connecting.on("error", warn);
+    connecting.on("ready", () => console.log("Redis connected"));
+    await connecting.connect();
   } catch {
     warn();
-    client = undefined;
+    if (client === connecting) client = undefined;
     retryAfter = Date.now() + 10000;
   }
 }
