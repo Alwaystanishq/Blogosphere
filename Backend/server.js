@@ -11,7 +11,7 @@ import { connectDB } from "./config/db.js";
 import { apiLimiter } from "./middlewares/rateLimit.js";
 
 const app = express();
-dotenv.config({ path: fileURLToPath(new URL("./.env", import.meta.url)) });
+dotenv.config();
 app.use(
   cors({
     origin: "http://localhost:5173",
