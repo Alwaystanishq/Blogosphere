@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import api from "../api/api";
 import BlogCard from "../components/BlogCard";
 
@@ -40,23 +41,23 @@ function LikedBlogs() {
   return (
     <div className="max-w-6xl mx-auto px-4 pt-20 pb-10">
       {/* Header */}
-      <div className="mb-10">
+      <div className="page-heading">
         <h1 className="text-4xl font-bold text-rose-500 mb-2">
-          ❤️ Liked Blogs
+          Worth another read.
         </h1>
 
         <p className="text-zinc-500">
-          Blogs you've enjoyed and saved with a like.
+          The stories you liked, all in one place.
         </p>
       </div>
 
       {/* Blogs */}
       {blogs.length === 0 ? (
-        <div className="bg-white border border-zinc-200 rounded-2xl p-8 text-center shadow-sm">
-          <p className="text-zinc-500">You haven't liked any blogs yet.</p>
+        <div className="empty-state">
+          <h2>Keep a good story close.</h2><p>Like a story as you read and find it here whenever you want to return.</p><Link to="/latest" className="button-primary">Discover stories</Link>
         </div>
       ) : (
-        <div className="space-y-6">
+        <div className="stories-grid">
           {blogs.map((blog) => (
             <BlogCard key={blog._id} blog={blog} />
           ))}

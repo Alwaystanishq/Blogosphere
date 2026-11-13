@@ -21,7 +21,7 @@ function SearchView({ filters, onSearch, onClear }) {
   const change = (event) => setForm({ ...form, [event.target.name]: event.target.value });
   const options = (values, current) => [...new Set([...values, ...(current ? [current] : [])])].sort();
   return <>
-    <form onSubmit={(event) => { event.preventDefault(); onSearch(form); }} className="bg-white border border-zinc-200 rounded-2xl p-5 mb-8 space-y-4">
+    <form onSubmit={(event) => { event.preventDefault(); onSearch(form); }} className="search-form space-y-4">
       <div>
         <label htmlFor="search-query" className="block font-semibold text-zinc-700 mb-2">Search</label>
         <input id="search-query" name="q" value={form.q} onChange={change} maxLength={200} placeholder="Search titles, articles, authors, or topics" className="w-full border border-zinc-300 rounded-xl p-3" />
@@ -46,13 +46,13 @@ function SearchView({ filters, onSearch, onClear }) {
         </label>
       </div>
       <div className="flex gap-4">
-        <button className="rounded-xl bg-indigo-600 text-white px-5 py-3 font-semibold">Search blogs</button>
+        <button className="rounded-xl bg-indigo-600 text-white px-5 py-3 font-semibold">Search stories</button>
         <button type="button" onClick={onClear} className="text-indigo-600 hover:underline">Clear search</button>
       </div>
     </form>
-    {!result ? <p role="status" className="text-center text-indigo-600">Searching...</p> : result.error ? <p role="alert" className="text-center text-red-600">{result.error}</p> : <>
+    {!result ? <p role="status" className="page-status">Searching...</p> : result.error ? <p role="alert" className="error-state">{result.error}</p> : <>
       <p role="status" className="text-zinc-500 mb-4">{result.blogs.length} {result.blogs.length === 1 ? "post" : "posts"} found{q ? ` for “${q}”` : ""}.</p>
-      {result.blogs.length === 0 ? <div className="border border-zinc-200 rounded-2xl bg-white p-8 text-center text-zinc-500">No matching posts. Try different words or clear the filters.</div> : <div className="space-y-6">{result.blogs.map((blog) => <BlogCard key={blog._id} blog={blog} />)}</div>}
+      {result.blogs.length === 0 ? <div className="empty-state">No matching posts. Try different words or clear the filters.</div> : <div className="stories-grid">{result.blogs.map((blog) => <BlogCard key={blog._id} blog={blog} />)}</div>}
     </>}
   </>;
 }
@@ -73,8 +73,7 @@ export default function Search() {
     setRevision((current) => current + 1);
   };
   return <div className="max-w-6xl mx-auto px-4 pt-20 pb-10">
-    <h1 className="text-4xl font-bold text-indigo-600 mb-2">Search Blogs</h1>
-    <p className="text-zinc-500 mb-8">Find published stories by title, content, author, category, or tag.</p>
+    <div className="page-heading"><p className="eyebrow">A little exploration</p><h1>Find your next read.</h1><p className="text-zinc-500">Search stories, writers, and the topics on your mind.</p></div>
     <SearchView key={`${params.toString()}:${revision}`} filters={filters} onSearch={onSearch} onClear={() => { setParams({}); setRevision((current) => current + 1); }} />
   </div>;
 }

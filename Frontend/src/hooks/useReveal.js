@@ -1,8 +1,5 @@
 import { useLayoutEffect, useRef } from "react";
 import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-
-gsap.registerPlugin(ScrollTrigger);
 
 export default function useReveal(ready = true) {
   const scope = useRef(null);
@@ -12,15 +9,8 @@ export default function useReveal(ready = true) {
     media.add("(prefers-reduced-motion: no-preference)", () => {
       const intro = scope.current.querySelectorAll("[data-intro]");
       if (intro.length) gsap.from(intro, {
-        y: 28, opacity: 0, duration: 0.85, stagger: 0.12,
-        ease: "power3.out", clearProps: "transform,opacity",
-      });
-      scope.current.querySelectorAll("[data-reveal]").forEach((element) => {
-        gsap.from(element, {
-          y: 24, opacity: 0, duration: 0.7, ease: "power2.out",
-          clearProps: "transform,opacity",
-          scrollTrigger: { trigger: element, start: "top 94%", once: true },
-        });
+        y: 16, opacity: 0, duration: 0.65, stagger: 0.07,
+        ease: "power2.out", clearProps: "transform,opacity",
       });
     }, scope);
     return () => media.revert();

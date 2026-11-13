@@ -1,98 +1,33 @@
 import { Link, Navigate } from "react-router-dom";
+import { HiArrowRight } from "react-icons/hi";
 import useReveal from "../hooks/useReveal";
 import { useAuth } from "../context/AuthContext";
 
-function Home() {
+export default function Home() {
   const { user, loading } = useAuth();
-
   const scope = useReveal(!loading && !user);
+  if (loading) return <div className="page-status" role="status">Opening Blogosphere…</div>;
+  if (user) return <Navigate to="/latest" replace />;
 
-  if (loading) {
-    return (
-      <div className="text-center pt-24 text-indigo-600 font-medium">
-        Loading...
-      </div>
-    );
-  }
-
-  if (user) {
-    return <Navigate to="/latest" replace />;
-  }
-
-  return (
-    <div ref={scope} className="editorial-home min-h-screen">
-      <div className="max-w-7xl mx-auto px-6 py-20">
-        <div className="grid lg:grid-cols-2 gap-16 items-center">
-          
-          {/* Left Side */}
-          <div>
-            <span data-intro className="bg-indigo-100 text-indigo-600 px-4 py-2 rounded-full text-sm font-semibold">
-              A HOME FOR CURIOUS MINDS
-            </span>
-
-            <h1 data-intro className="text-5xl md:text-7xl font-bold mt-6 leading-tight">
-              Ideas worth
-              <span className="block text-indigo-600">
-                putting into words.
-              </span>
-            </h1>
-
-            <p data-intro className="text-zinc-600 text-lg mt-6 leading-8 max-w-xl">
-              Blogosphere is a place where writers and readers connect.
-              Publish articles, discover ideas, and build your personal brand.
-            </p>
-
-            <div data-intro className="flex flex-wrap gap-4 mt-10">
-              <Link
-                to="/signup"
-                className="bg-emerald-500 hover:bg-emerald-600 text-white px-8 py-4 rounded-xl font-semibold transition shadow-lg"
-              >
-                Start Writing
-              </Link>
-
-              <Link
-                to="/login"
-                className="border-2 border-indigo-500 text-indigo-600 hover:bg-indigo-600 hover:text-white px-8 py-4 rounded-xl font-semibold transition"
-              >
-                Login
-              </Link>
-            </div>
-          </div>
-
-          {/* Right Side */}
-          <div className="grid gap-5">
-            <div data-reveal className="home-feature bg-white p-6 rounded-3xl border border-zinc-100">
-              <h3 className="text-xl font-bold text-indigo-600 mb-2">
-                01 / Share your perspective
-              </h3>
-              <p className="text-zinc-600">
-                Write articles and share your thoughts with thousands of readers.
-              </p>
-            </div>
-
-            <div data-reveal className="home-feature bg-white p-6 rounded-3xl border border-zinc-100">
-              <h3 className="text-xl font-bold text-rose-500 mb-2">
-                02 / Follow your curiosity
-              </h3>
-              <p className="text-zinc-600">
-                Discover blogs, like your favorites, and explore new ideas.
-              </p>
-            </div>
-
-            <div data-reveal className="home-feature bg-white p-6 rounded-3xl border border-zinc-100">
-              <h3 className="text-xl font-bold text-emerald-600 mb-2">
-                03 / Find your people
-              </h3>
-              <p className="text-zinc-600">
-                Create a unique identity and showcase your published work.
-              </p>
-            </div>
-          </div>
-
+  return <div ref={scope} className="editorial-home">
+    <section className="home-hero page-shell" aria-labelledby="home-title">
+      <div className="home-intro">
+        <p data-intro className="home-kicker">Independent voices. Different perspectives.</p>
+        <h1 data-intro id="home-title">Good stories.<br />Fresh ideas.</h1>
+        <p data-intro className="home-description">A place to read something new,<br className="home-description-break" /> and write something of your own.</p>
+        <div data-intro className="home-actions">
+          <Link className="button-primary" to="/latest">Start reading</Link>
+          <Link className="button-text" to="/create">Write a story</Link>
         </div>
       </div>
-    </div>
-  );
+      <aside className="home-reading-room" aria-label="Explore Blogosphere">
+        <p className="reading-room-label">Make yourself at home</p>
+        <ul className="home-paths">
+          <li><Link to="/latest"><div><span className="home-path-label">01 / Discover</span><h2>Follow a new thought.</h2><p>Explore stories by topic and find a perspective that stays with you.</p></div><HiArrowRight aria-hidden="true" /></Link></li>
+          <li><Link to="/create"><div><span className="home-path-label">02 / Write</span><h2>Give an idea a page.</h2><p>Start with a private draft. Publish when your words are ready.</p></div><HiArrowRight aria-hidden="true" /></Link></li>
+          <li><Link to="/latest?sort=popular"><div><span className="home-path-label">03 / Discuss</span><h2>Keep the story going.</h2><p>Leave a comment, ask a question, and talk with other readers.</p></div><HiArrowRight aria-hidden="true" /></Link></li>
+        </ul>
+      </aside>
+    </section>
+  </div>;
 }
-
-export default Home;

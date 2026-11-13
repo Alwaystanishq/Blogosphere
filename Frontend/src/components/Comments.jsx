@@ -98,7 +98,7 @@ export default function Comments({ blogId, blogAuthorId }) {
       {!isReply && comment.replies.map((reply) => content(reply, true))}
     </div>
   );
-  return <section className="mt-10 border-t border-zinc-200 pt-8" aria-label="Comments and replies">
+  return <section className="discussion mt-10 border-t border-zinc-200 pt-8" aria-label="Comments and replies">
     <h2 className="text-2xl font-bold text-zinc-800">Discussion</h2>
     <p className="text-sm text-zinc-500 mt-2">Join the conversation. You can remove your comments; the post author can moderate the discussion.</p>
     <CommentForm disabled={loading} label="Post comment" onSubmit={(text) => post(text)} />

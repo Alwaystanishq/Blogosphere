@@ -3,3 +3,5 @@
 /Backend/.env
 /Backend/uploads/*
 !/Backend/uploads/default.png
+/Frontend/dist
+/Frontend/.*

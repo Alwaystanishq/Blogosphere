@@ -21,7 +21,7 @@ export default function MarkdownEditor({ value, format, onChange }) {
     });
   };
   return (
-    <div>
+    <div className="markdown-editor">
       <div className="flex flex-wrap justify-between items-center gap-3 mb-2">
         <label htmlFor="blog-article" className="font-semibold text-zinc-700">Article</label>
         <div className="flex gap-2" aria-label="Editor view">

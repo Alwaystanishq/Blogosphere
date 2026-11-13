@@ -17,6 +17,8 @@ function BlogContent({ id }) {
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [liking, setLiking] = useState(false);
+  const [likeError, setLikeError] = useState("");
 
   useEffect(() => {
     const controller = new AbortController();
@@ -50,14 +52,17 @@ function BlogContent({ id }) {
   }, [id, user]);
 
   const handleLike = async () => {
+    if (liking) return;
+    setLiking(true);
+    setLikeError("");
     try {
       await api.post(`/blogs/like/${id}`);
 
       setLiked(!liked);
       setLikesCount((prev) => (liked ? prev - 1 : prev + 1));
-    } catch (error) {
-      console.log("Like failed", error);
-    }
+    } catch (err) {
+      setLikeError(err.response?.data?.message || "Could not update your like. Please try again.");
+    } finally { setLiking(false); }
   };
 
   if (loading) {
@@ -77,9 +82,9 @@ function BlogContent({ id }) {
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-4 pt-20 pb-10">
-      <div className="bg-white rounded-3xl shadow-lg border border-zinc-200 p-8">
-        {blog.coverImage && <img src={imageUrl(blog.coverImage)} alt="" className="w-full max-h-96 object-cover rounded-2xl mb-6" />}
+    <div className="reading-page max-w-4xl mx-auto px-4 pt-20 pb-10">
+      <div className="reading-sheet">
+        {blog.coverImage && <img src={imageUrl(blog.coverImage)} alt="" width="800" height="450" className="w-full max-h-96 object-cover rounded-2xl mb-6" />}
         {/* Title */}
         <h1 className="text-4xl md:text-5xl font-bold text-indigo-600 mb-6 leading-tight">
           {blog.title}
@@ -88,15 +93,14 @@ function BlogContent({ id }) {
         <BlogTopics category={blog.category} tags={blog.tags} />
 
         {/* Author + Like */}
-        <div className="flex justify-between items-center mb-10 pb-6 border-b border-zinc-200">
+        <div className="article-byline flex justify-between items-center mb-10 pb-6 border-b border-zinc-200">
           {/* Author */}
           <div className="flex items-center gap-3">
             <Link to={`/profile/${blog.writtenBy?.username}`}>
               <img
-                src={`http://localhost:5000${
-                  blog.writtenBy?.profilePic || "/uploads/default.png"
-                }`}
-                alt="profile"
+                src={imageUrl(blog.writtenBy?.profilePic || "/uploads/default.png")}
+                alt={`${blog.writtenBy?.username || "Writer"}’s profile`}
+                width="48" height="48"
                 className="w-12 h-12 rounded-full object-cover border border-zinc-300 hover:scale-105 transition"
               />
             </Link>
@@ -117,20 +121,19 @@ function BlogContent({ id }) {
 
           {/* Like Button */}
           <button
+            hidden={blog.status === "draft"}
             onClick={handleLike}
-            className={`flex items-center gap-2 px-5 py-2 rounded-full transition font-medium
-            ${
-              liked
-                ? "bg-rose-500 text-white hover:bg-rose-600"
-                : "bg-rose-100 text-rose-600 hover:bg-rose-200"
-            }`}
+            disabled={liking}
+            aria-pressed={Boolean(liked)}
+            aria-label={`${liked ? "Unlike" : "Like"} this story (${likesCount} likes)`}
+            className="like-button flex items-center gap-2 px-5 py-2 rounded-full font-medium"
           >
             <BiSolidLike size={18} />
             <span>{likesCount}</span>
           </button>
         </div>
 
-        {/* Article */}
+        {likeError && <p role="alert" className="error-state mb-6">{likeError}</p>}
         <article className="leading-9 text-lg text-zinc-700">
           <ArticleContent article={blog.article} format={blog.articleFormat} />
         </article>

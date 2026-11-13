@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import api from "../api/api";
+import { imageUrl } from "../utils/imageUrl";
 import BlogCard from "../components/BlogCard";
 
 function Profile() {
@@ -56,23 +57,25 @@ function Profile() {
   }
 
   return (
-    <div className="max-w-6xl mx-auto px-4 pt-20 pb-10">
+    <div className="profile-page max-w-6xl mx-auto px-4 pt-20 pb-10">
       {/* Profile Header */}
-      <div className="bg-white border border-zinc-200 rounded-3xl shadow-lg p-8 mb-10">
+      <div className="profile-header">
         <div className="flex flex-col md:flex-row items-center gap-6">
           <img
-            src={`http://localhost:5000${user.profilePic}`}
-            alt="profile"
+            src={imageUrl(user.profilePic || "/uploads/default.png")}
+            alt={`${user.username}’s profile`}
+            width="100" height="100"
             className="w-28 h-28 rounded-full object-cover border-4 border-indigo-100"
           />
 
           <div className="text-center md:text-left">
             <h1 className="text-4xl font-bold text-indigo-600">
-              @{user.username}
+              {user.name || user.username}
             </h1>
+            <p className="mt-2 text-sm text-zinc-600">@{user.username}</p>
 
             <p className="text-zinc-500 mt-2">
-              {blogs.length} {blogs.length === 1 ? "Blog" : "Blogs"} Published
+              {blogs.length} {blogs.length === 1 ? "story" : "stories"} published
             </p>
           </div>
         </div>
@@ -80,8 +83,8 @@ function Profile() {
 
       {/* Blogs Section */}
       <div className="mb-6">
-        <h2 className="text-3xl font-bold text-indigo-600">
-          Blogs
+        <h2 id="profile-stories-title" className="text-3xl font-bold text-indigo-600">
+          Published stories
         </h2>
 
         <p className="text-zinc-500 mt-1">
@@ -89,14 +92,15 @@ function Profile() {
         </p>
       </div>
 
+      <div className="profile-stories" role="region" aria-labelledby="profile-stories-title" tabIndex={0}>
       {blogs.length === 0 ? (
-        <div className="bg-white border border-zinc-200 rounded-2xl p-8 text-center shadow-sm">
+        <div className="empty-state">
           <p className="text-zinc-500">
             This user hasn't written any blogs yet.
           </p>
         </div>
       ) : (
-        <div className="space-y-6">
+        <div className="stories-grid">
           {blogs.map((blog) => (
             <BlogCard
               key={blog._id}
@@ -105,6 +109,7 @@ function Profile() {
           ))}
         </div>
       )}
+      </div>
     </div>
   );
 }

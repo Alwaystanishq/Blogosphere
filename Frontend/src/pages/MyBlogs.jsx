@@ -1,108 +1,48 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { HiOutlinePencilAlt } from "react-icons/hi";
 import api from "../api/api";
 import BlogCard from "../components/BlogCard";
 
-function MyBlogs() {
+export default function MyBlogs() {
   const navigate = useNavigate();
-
   const [blogs, setBlogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [filter, setFilter] = useState("all");
+  const [attempt, setAttempt] = useState(0);
+  const [deleting, setDeleting] = useState(null);
 
   useEffect(() => {
-    const fetchMyBlogs = async () => {
-      try {
-        const res = await api.get("/blogs");
-
-        if (res.data.success) {
-          setBlogs(res.data.blogs || []);
-        }
-      } catch (err) {
-        setError(err.response?.data?.message || "Failed to load blogs");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchMyBlogs();
-  }, []);
+    const controller = new AbortController();
+    api.get("/blogs", { signal: controller.signal }).then(({ data }) => {
+      setBlogs(data.blogs || []);
+    }).catch((err) => {
+      if (!controller.signal.aborted) setError(err.response?.data?.message || "Could not load your stories.");
+    }).finally(() => { if (!controller.signal.aborted) setLoading(false); });
+    return () => controller.abort();
+  }, [attempt]);
 
   const handleDelete = async (id) => {
-    const confirmDelete = window.confirm(
-      "Are you sure you want to delete this blog?",
-    );
-
-    if (!confirmDelete) return;
-
+    if (deleting || !window.confirm("Delete this story permanently? This also removes its comments.")) return;
+    setDeleting(id);
+    setError("");
     try {
       await api.delete(`/blogs/${id}`);
-
-      setBlogs(blogs.filter((blog) => blog._id !== id));
-    } catch {
-      alert("Failed to delete blog");
-    }
+      setBlogs((current) => current.filter((blog) => blog._id !== id));
+    } catch (err) {
+      setError(err.response?.data?.message || "Could not delete this story. Please try again.");
+    } finally { setDeleting(null); }
   };
-
-  if (loading) {
-    return (
-      <div className="text-center pt-24 text-indigo-600 font-medium">
-        Loading your blogs...
-      </div>
-    );
-  }
-
-  if (error) {
-    return <div className="text-center text-red-500 pt-24">{error}</div>;
-  }
-
-  return (
-    <div className="max-w-6xl mx-auto px-4 pt-20 pb-10">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between md:items-center gap-4 mb-10">
-        <div>
-          <h1 className="text-4xl font-bold text-indigo-600 mb-2">Your stories.</h1>
-
-          <p className="text-zinc-500">
-            Manage your private drafts and published articles.
-          </p>
-        </div>
-
-        <button
-          onClick={() => navigate("/create")}
-          className="bg-emerald-500 hover:bg-emerald-600 text-white px-5 py-3 rounded-xl font-semibold transition shadow-md"
-        >
-          + Create Blog
-        </button>
-      </div>
-
-      {/* Blogs */}
-      {blogs.length === 0 ? (
-        <div className="bg-white border border-zinc-200 rounded-2xl p-8 text-center shadow-sm">
-          <p className="text-zinc-500">You haven't written any blogs yet.</p>
-
-          <button
-            onClick={() => navigate("/create")}
-            className="mt-4 bg-emerald-500 hover:bg-emerald-600 text-white px-5 py-2 rounded-xl transition"
-          >
-            Write Your First Blog
-          </button>
-        </div>
-      ) : (
-        <div className="stories-grid">
-          {blogs.map((blog) => (
-            <BlogCard
-              key={blog._id}
-              blog={blog}
-              showActions={true}
-              onEdit={() => navigate(`/edit/${blog._id}`)}
-              onDelete={() => handleDelete(blog._id)}
-            />
-          ))}
-        </div>
-      )}
+  const visible = blogs.filter((blog) => filter === "all" || (filter === "draft" ? blog.status === "draft" : blog.status !== "draft"));
+  const count = (status) => blogs.filter((blog) => status === "all" || (status === "draft" ? blog.status === "draft" : blog.status !== "draft")).length;
+  return <div className="max-w-6xl mx-auto px-4 pt-20 pb-10">
+    <div className="page-heading flex flex-col md:flex-row justify-between md:items-center gap-6">
+      <div><p className="eyebrow">Your writing desk</p><h1>Your stories.</h1><p className="text-zinc-500 mt-4">A home for your published words and your next big idea.</p></div>
+      <Link to="/create" className="button-primary"><HiOutlinePencilAlt aria-hidden="true" /> Write a story</Link>
     </div>
-  );
+    <div className="story-tabs" role="group" aria-label="Filter your stories">{[["all", "All stories"], ["published", "Published"], ["draft", "Drafts"]].map(([value, label]) => <button key={value} aria-pressed={filter === value} onClick={() => setFilter(value)}>{label}<span>{count(value)}</span></button>)}</div>
+    {error && <div role="alert" className="error-state mb-6"><p>{error}</p><button onClick={() => { setError(""); setLoading(true); setAttempt(attempt + 1); }}>Try again</button></div>}
+    {loading ? <p className="page-status" role="status">Opening your writing desk…</p> : visible.length ? <div className="stories-grid">{visible.map((blog) => <BlogCard key={blog._id} blog={blog} showActions onEdit={() => navigate(`/edit/${blog._id}`)} onDelete={() => handleDelete(blog._id)} deleting={deleting === blog._id} />)}</div> : !error && <div className="empty-state"><h2>{filter === "draft" ? "Room for your next idea." : filter === "published" ? "Your audience can wait." : "Start with a sentence."}</h2><p>{filter === "published" ? "Your published stories will appear here. Keep working on a draft, or start something new." : "You don’t need the perfect words to begin. Start a story and save a private draft whenever you need a break."}</p><Link to="/create" className="button-primary">Write a story</Link></div>}
+  </div>;
 }
-
-export default MyBlogs;

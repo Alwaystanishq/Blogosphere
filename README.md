@@ -58,7 +58,7 @@ Categories are limited to 60 characters and tags to 30 characters each. Topics a
 - Combine search text with topic filters and sort by newest, oldest, or most liked.
 - Like and unlike published posts.
 
-Search queries accept up to 200 characters and match literal text without case sensitivity. A blank query browses published posts. Search filters are stored in the URL. The API also exposes liked-post and top-liked feeds; a dedicated liked-post page file exists but is not registered in the frontend router.
+Search queries accept up to 200 characters and match literal text without case sensitivity. A blank query browses published posts. Search filters are stored in the URL. The API also exposes liked-post and top-liked feeds; liked posts are available from the navigation.
 
 ### Comments and replies
 
@@ -86,7 +86,7 @@ Versions below show the major versions declared in the package manifests. Exact 
 | Routing | React Router 7 | Page navigation, URL filters, and protected routes |
 | Build tooling | Vite 7 | Development server and production builds |
 | Styling | Tailwind CSS 4 and custom CSS | Layout, components, and responsive styles |
-| Animation | GSAP 3 and ScrollTrigger | Entrance and scroll animations with reduced-motion handling |
+| Animation | GSAP 3 | Home entrance animation with reduced-motion handling |
 | HTTP client | Axios 1 | API requests with authentication cookies |
 | Article rendering | react-markdown 10 and remark-breaks 4 | Markdown rendering and line breaks; raw HTML is skipped |
 | Icons | React Icons 5 | Navigation and interface icons |
@@ -157,7 +157,7 @@ Blogosphere/
 │   │   ├── api/api.js            # Axios base URL and cookie configuration
 │   │   ├── components/          # Editor, cards, comments, topics, navigation, and guards
 │   │   ├── context/AuthContext.jsx
-│   │   ├── hooks/useReveal.js    # GSAP entrance and scroll animations
+│   │   ├── hooks/useReveal.js    # GSAP home entrance animation
 │   │   ├── pages/               # Home, accounts, discovery, writing, search, and profiles
 │   │   ├── utils/
 │   │   │   ├── imageUrl.js       # Resolve image paths against the API origin
@@ -258,6 +258,7 @@ The frontend currently uses a fixed API URL in `Frontend/src/api/api.js`, rather
 | `/login` | Sign in | Public |
 | `/signup` | Create account | Public |
 | `/myblog` | Manage your drafts and published posts | Signed in |
+| `/liked` | Revisit posts you have liked | Signed in |
 | `/create` | Write a new post | Signed in |
 | `/edit/:id` | Edit your post | Signed in; API enforces ownership |
 | `/blog/:id` | Read a post and its discussion | Signed in; drafts are owner-only |

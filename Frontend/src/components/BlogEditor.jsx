@@ -91,16 +91,16 @@ export default function BlogEditor({ id, initialBlog = {} }) {
   const wordCount = form.article.trim().split(/\s+/).filter(Boolean).length;
   const isPublished = initialBlog.status !== "draft" && Boolean(id);
   return (
-    <div className="max-w-4xl mx-auto px-4 pt-20 pb-10">
-      <div className="bg-white border border-zinc-200 rounded-3xl shadow-lg p-8">
-        <h1 className="text-4xl font-bold text-indigo-600 mb-2">{id ? "Edit Blog" : "Create New Blog"}</h1>
+    <div className="writing-page max-w-4xl mx-auto px-4 pt-20 pb-10">
+      <div className="writing-sheet">
+        <h1 className="text-4xl font-bold text-indigo-600 mb-2">{id ? "Shape your story." : "Make room for an idea."}</h1>
         <p role="status" className="text-zinc-500 mb-6">{recoveryMessage}</p>
         {error && <p role="alert" className="bg-red-100 text-red-600 p-3 rounded-xl mb-6">{error}</p>}
         <form onSubmit={(event) => { event.preventDefault(); save("published"); }} className="space-y-6">
           <fieldset disabled={saving || uploadingCover} className="space-y-6">
             <div>
-              <label htmlFor="blog-title" className="block mb-2 font-semibold text-zinc-700">Blog Title</label>
-              <input id="blog-title" name="title" value={form.title} onChange={handleChange} placeholder="Enter an engaging title..." className="w-full border border-zinc-300 px-4 py-3 rounded-xl" />
+              <label htmlFor="blog-title" className="block mb-2 font-semibold text-zinc-700">Story title</label>
+              <input id="blog-title" name="title" value={form.title} onChange={handleChange} placeholder="Give your story a title" className="w-full border border-zinc-300 px-4 py-3 rounded-xl" />
             </div>
             <CoverImageInput value={form.coverImage} onChange={(coverImage) => updateForm({ coverImage })} onUploading={setUploadingCover} />
             <div className="grid gap-6 md:grid-cols-2">
@@ -117,8 +117,8 @@ export default function BlogEditor({ id, initialBlog = {} }) {
             <MarkdownEditor value={form.article} format={form.articleFormat || initialBlog.articleFormat || (id ? "plain" : "markdown")} onChange={(article, articleFormat) => updateForm({ article, articleFormat })} />
             <div className="editor-actions flex flex-wrap items-center justify-end gap-3">
               <p className="mr-auto text-sm text-zinc-500" role="status">{wordCount} words · {Math.max(1, Math.ceil(wordCount / 200))} min read</p>
-              {!isPublished && <button type="button" disabled={uploadingCover} onClick={() => save("draft")} className="bg-indigo-100 text-indigo-700 px-6 py-3 rounded-xl font-semibold">Save Draft</button>}
-              <button type="submit" disabled={uploadingCover} className="bg-emerald-500 text-white px-6 py-3 rounded-xl font-semibold">{saving ? "Saving..." : isPublished ? "Update Blog" : "Publish Blog"}</button>
+              {!isPublished && <button type="button" disabled={uploadingCover} onClick={() => save("draft")} className="bg-indigo-100 text-indigo-700 px-6 py-3 rounded-xl font-semibold">Save draft</button>}
+              <button type="submit" disabled={uploadingCover} className="bg-emerald-500 text-white px-6 py-3 rounded-xl font-semibold">{saving ? "Saving..." : isPublished ? "Update story" : "Publish story"}</button>
             </div>
           </fieldset>
         </form>

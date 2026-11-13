@@ -28,15 +28,18 @@ export default function Navbar() {
   };
   const links = () => user ? <>
     <NavLink to="/latest" onClick={() => setOpen(false)}>Discover</NavLink>
+    <NavLink to="/liked" onClick={() => setOpen(false)}>Liked</NavLink>
     <NavLink to="/myblog" onClick={() => setOpen(false)}>My stories</NavLink>
     <NavLink to={`/profile/${user.username}`} onClick={() => setOpen(false)}>Profile</NavLink>
     <Link className="nav-write" to="/create" onClick={() => setOpen(false)}><HiOutlinePencilAlt /> Write a story</Link>
     <button className="nav-logout" disabled={loggingOut} onClick={handleLogout}>{loggingOut ? "Signing out…" : "Sign out"}</button>
   </> : <>
+    <Link to="/latest" onClick={() => setOpen(false)}>Discover</Link>
+    <Link to="/create" onClick={() => setOpen(false)}>Write</Link>
     <NavLink to="/login" onClick={() => setOpen(false)}>Sign in</NavLink>
-    <Link className="nav-write" to="/signup" onClick={() => setOpen(false)}>Get started <span aria-hidden="true">↗</span></Link>
+    <Link className="nav-write" to="/signup" onClick={() => setOpen(false)}>Get started</Link>
   </>;
-  const searchForm = () => <form role="search" onSubmit={handleSearch} className="nav-search"><HiOutlineSearch aria-hidden="true" /><input type="search" aria-label="Search stories" placeholder="Find your next read…" value={search} onChange={(event) => setSearch(event.target.value)} /><button type="submit" aria-label="Submit search">↵</button></form>;
+  const searchForm = () => <form role="search" onSubmit={handleSearch} className="nav-search"><HiOutlineSearch aria-hidden="true" /><input type="search" maxLength={200} aria-label="Search stories" placeholder="Search stories…" value={search} onChange={(event) => setSearch(event.target.value)} /><button type="submit" aria-label="Submit search">↵</button></form>;
   return <>
     <a className="skip-link" href="#main-content">Skip to content</a>
     <nav className="site-nav" aria-label="Main navigation">

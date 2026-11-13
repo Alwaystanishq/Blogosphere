@@ -1,11 +1,13 @@
+import AuthLayout from "../components/AuthLayout";
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import api from "../api/api";
 import { useAuth } from "../context/AuthContext";
 
 function Login() {
   const { setUser } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [form, setForm] = useState({
     email: "",
@@ -34,7 +36,7 @@ function Login() {
 
       if (res.data.success) {
         setUser(res.data.user);
-        navigate("/myblog");
+        navigate(location.state?.from || "/latest", { replace: true });
       }
     } catch (err) {
       setError(err.response?.data?.message || "Login failed");
@@ -44,15 +46,13 @@ function Login() {
   };
 
   return (
-    <div className="auth-page">
-      <div className="auth-card">
-        {/* Heading */}
-        <h2 className="text-3xl font-bold text-center text-indigo-600 mb-2">
-          Welcome Back
-        </h2>
+    <AuthLayout>
+        <h1 className="text-3xl font-bold text-center text-indigo-600 mb-2">
+          Welcome back.
+        </h1>
 
         <p className="text-center text-zinc-500 mb-8">
-          Login to continue exploring Blogosphere.
+          Your next read is waiting. Sign in to pick up where you left off.
         </p>
 
         {error && (
@@ -62,7 +62,6 @@ function Login() {
         )}
 
         <form onSubmit={handleSubmit} aria-busy={loading} className="auth-form space-y-5">
-          {/* Email */}
           <label className="form-label" htmlFor="login-email">Email address</label>
           <input
             type="email"
@@ -75,8 +74,6 @@ function Login() {
             onChange={handleChange}
             className="w-full border border-zinc-300 px-4 py-3 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition"
           />
-
-          {/* Password */}
           <label className="form-label" htmlFor="login-password">Password</label>
           <input
             type={showPassword ? "text" : "password"}
@@ -90,29 +87,24 @@ function Login() {
             className="w-full border border-zinc-300 px-4 py-3 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition"
           />
           <button type="button" className="password-toggle" aria-pressed={showPassword} onClick={() => setShowPassword(!showPassword)}>{showPassword ? "Hide password" : "Show password"}</button>
-
-          {/* Login Button */}
           <button
             type="submit"
             disabled={loading}
             className="w-full bg-emerald-500 hover:bg-emerald-600 text-white py-3 rounded-xl font-semibold transition disabled:opacity-70"
           >
-            {loading ? "Logging in..." : "Login"}
+            {loading ? "Signing in…" : "Sign in"}
           </button>
         </form>
-
-        {/* Footer */}
         <p className="text-sm text-center mt-6 text-zinc-600">
           Don't have an account?{" "}
           <Link
             to="/signup"
             className="text-indigo-600 font-semibold hover:text-indigo-700"
           >
-            Signup
+            Create an account
           </Link>
         </p>
-      </div>
-    </div>
+    </AuthLayout>
   );
 }
 
